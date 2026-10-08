@@ -4,7 +4,6 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "prestart": "npx prisma generate && tsc",
     "build": "npx prisma generate && tsc",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
