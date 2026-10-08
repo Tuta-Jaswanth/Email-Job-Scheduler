@@ -1,0 +1,146 @@
+import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+import { env } from './config/env';
+import { logger } from './utils/logger';
+import authRoutes from './routes/auth.routes';
+import emailRoutes from './routes/email.routes';
+import slackRoutes from './routes/slack.routes';
+import senderRoutes from './routes/sender.routes';
+import userRoutes from './routes/user.routes';
+import { ensureIndex } from './services/search.service';
+import { emailWorker, shutdownWorker } from './workers/email.worker';
+import { serverAdapter } from './queues/board';
+import { prisma } from './config/db';
+import { redis } from './config/redis';
+
+// ── App ───────────────────────────────────────────────────────────────────────
+
+const app = express();
+
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
+
+// CORS: allow configured frontend origin, localhost, and Vercel deployments
+const allowedOrigins = [
+  env.frontendUrl,
+  'http://localhost:5173',
+  'http://localhost:3000',
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app') ||
+      origin.endsWith('.onrender.com')
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  exposedHeaders: ['Set-Cookie'],
+}));
+
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(cookieParser(env.jwtSecret));
+
+// ── Routes ────────────────────────────────────────────────────────────────────
+
+// BullMQ admin dashboard (no auth guard – add one in production)
+app.use('/admin/queues', serverAdapter.getRouter());
+
+app.get('/health', async (_req, res) => {
+  // Quick liveness probe
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    const redisPing = await redis.ping();
+    res.json({ ok: true, db: 'up', redis: redisPing === 'PONG' ? 'up' : 'down' });
+  } catch (err) {
+    res.status(503).json({ ok: false, error: String(err) });
+  }
+});
+
+app.use('/auth', authRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/emails', emailRoutes);
+app.use('/api/slack', slackRoutes);
+app.use('/api/senders', senderRoutes);
+app.use('/api', userRoutes);
+
+// 404 catch-all
+app.use((_req, res) => res.status(404).json({ message: 'Not found' }));
+
+// Global error handler
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  logger.error('unhandled.error', { error: String(err?.message || err) });
+  res.status(500).json({ message: 'Internal server error' });
+});
+
+// ── Startup ───────────────────────────────────────────────────────────────────
+
+async function start() {
+  // Ensure Elasticsearch index exists
+  await ensureIndex().catch((err) =>
+    logger.warn('es.init.skipped', { error: String(err) }),
+  );
+
+  // Clean up any legacy dummy sender
+  await prisma.sender.deleteMany({
+    where: { email: 'oliver.brown@domain.io' },
+  }).catch(() => {});
+
+  const server = app.listen(env.port, () => {
+    logger.info('server.started', {
+      port: env.port,
+      env: process.env.NODE_ENV,
+      workerConcurrency: env.concurrency,
+      bullBoard: `/admin/queues`,
+    });
+  });
+
+  // ── Graceful shutdown ────────────────────────────────────────────────────
+  const shutdown = async (signal: string) => {
+    logger.info('server.shutdown.start', { signal });
+
+    // Stop accepting new HTTP connections
+    server.close(async () => {
+      try {
+        await shutdownWorker();
+        await prisma.$disconnect();
+        redis.disconnect();
+        logger.info('server.shutdown.complete');
+        process.exit(0);
+      } catch (err) {
+        logger.error('server.shutdown.error', { error: String(err) });
+        process.exit(1);
+      }
+    });
+
+    // Force-exit if graceful shutdown takes > 30 s
+    setTimeout(() => {
+      logger.error('server.shutdown.timeout');
+      process.exit(1);
+    }, 30_000).unref();
+  };
+
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT',  () => shutdown('SIGINT'));
+
+  process.on('unhandledRejection', (reason) => {
+    logger.error('unhandledRejection', { reason: String(reason) });
+  });
+  process.on('uncaughtException', (err) => {
+    logger.error('uncaughtException', { error: String(err) });
+    process.exit(1);
+  });
+}
+
+start().catch((err) => {
+  logger.error('startup.failed', { error: String(err) });
+  process.exit(1);
+});
