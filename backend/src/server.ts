@@ -84,15 +84,24 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 // ── Startup ───────────────────────────────────────────────────────────────────
 
 async function start() {
-  // Ensure Elasticsearch index exists
+  console.log('🚀 ReachInbox Backend starting up...');
+  console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔌 Database URL configured: ${Boolean(env.dbUrl)}`);
+  console.log(`🔌 Redis URL configured: ${Boolean(env.redisUrl)}`);
+
+  // Ensure Elasticsearch index exists (non-fatal)
   await ensureIndex().catch((err) =>
-    logger.warn('es.init.skipped', { error: String(err) }),
+    console.warn('[Elasticsearch] Init skipped:', String(err?.message || err)),
   );
 
-  // Clean up any legacy dummy sender
-  await prisma.sender.deleteMany({
-    where: { email: 'oliver.brown@domain.io' },
-  }).catch(() => {});
+  // Clean up any legacy dummy sender (non-fatal)
+  if (env.dbUrl) {
+    await prisma.sender.deleteMany({
+      where: { email: 'oliver.brown@domain.io' },
+    }).catch((err) => {
+      console.warn('[Prisma] Cleanup notice:', String(err?.message || err));
+    });
+  }
 
   const server = app.listen(env.port, () => {
     logger.info('server.started', {
@@ -101,6 +110,7 @@ async function start() {
       workerConcurrency: env.concurrency,
       bullBoard: `/admin/queues`,
     });
+    console.log(`✅ ReachInbox API is live on port ${env.port}`);
   });
 
   // ── Graceful shutdown ────────────────────────────────────────────────────
@@ -132,15 +142,17 @@ async function start() {
   process.on('SIGINT',  () => shutdown('SIGINT'));
 
   process.on('unhandledRejection', (reason) => {
+    console.error('unhandledRejection:', reason);
     logger.error('unhandledRejection', { reason: String(reason) });
   });
   process.on('uncaughtException', (err) => {
+    console.error('uncaughtException:', err);
     logger.error('uncaughtException', { error: String(err) });
-    process.exit(1);
   });
 }
 
 start().catch((err) => {
+  console.error('❌ Server startup failed:', err);
   logger.error('startup.failed', { error: String(err) });
   process.exit(1);
 });
