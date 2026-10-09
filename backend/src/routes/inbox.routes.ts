@@ -8,6 +8,7 @@ import {
   toggleReceivedStar,
   deleteReceived,
   simulateInbound,
+  syncInbox,
   inboundWebhook,
 } from '../controllers/inbox.controller';
 
@@ -21,6 +22,7 @@ router.use(auth);
 
 router.get('/', listReceived);
 router.get('/counts', getReceivedCounts);
+router.post('/sync', syncInbox);
 router.post('/simulate', simulateInbound);
 router.get('/:id', getReceivedById);
 router.patch('/:id/read', setReadStatus);

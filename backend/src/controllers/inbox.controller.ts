@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { prisma } from '../config/db';
 import { logger } from '../utils/logger';
 import { v4 as uuid } from 'uuid';
+import { syncEtherealMessagesForUser } from '../services/ethereal-sync.service';
 
 type AuthRequest = Request & { user: { id: string; email?: string; name?: string } };
 
@@ -98,12 +99,36 @@ async function autoSeedInboxIfEmpty(userId: string, userEmail: string) {
 
 // ── List Received Emails ──────────────────────────────────────────────────────
 
+export async function syncInbox(req: Request, res: Response) {
+  const userId = (req as AuthRequest).user.id;
+  const userEmail = (req as AuthRequest).user.email || 'user@reachinbox.ai';
+
+  try {
+    const newlyImported = await syncEtherealMessagesForUser(userId, userEmail);
+    const total = await prisma.receivedEmail.count({ where: { userId } });
+    const unreadCount = await prisma.receivedEmail.count({ where: { userId, isRead: false } });
+
+    return res.json({
+      ok: true,
+      newlyImported,
+      total,
+      unreadCount,
+      message: `Synchronized ${newlyImported} new message${newlyImported !== 1 ? 's' : ''} from Ethereal.`,
+    });
+  } catch (err: any) {
+    logger.warn('inbox.syncInbox.error', { userId, error: err.message });
+    return res.status(500).json({ message: 'Failed to sync with Ethereal mailbox' });
+  }
+}
+
 export async function listReceived(req: Request, res: Response) {
   const userId = (req as AuthRequest).user.id;
   const userEmail = (req as AuthRequest).user.email || 'user@reachinbox.ai';
 
-  // Seed realistic demo emails if brand new inbox
-  await autoSeedInboxIfEmpty(userId, userEmail);
+  // Automatically sync real Ethereal messages into the inbox
+  if (req.query.sync === 'true' || req.query.page === '1' || !req.query.page) {
+    await syncEtherealMessagesForUser(userId, userEmail).catch(() => {});
+  }
 
   const filter = String(req.query.filter || 'all').toLowerCase();
   const search = String(req.query.search || '').trim().toLowerCase();

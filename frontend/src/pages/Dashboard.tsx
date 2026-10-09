@@ -21,6 +21,7 @@ export const Dashboard: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
   // View mode: 'list' | 'compose' | 'detail'
   const [currentView, setCurrentView] = useState<'list' | 'compose' | 'detail'>('list');
@@ -61,6 +62,7 @@ export const Dashboard: React.FC = () => {
             params: {
               filter: inboxFilter,
               search: searchQuery.trim() || undefined,
+              sync: showRefreshingSpinner ? 'true' : undefined,
             },
           });
           const data = res.data;
@@ -303,6 +305,22 @@ export const Dashboard: React.FC = () => {
     }
   }, [fetchCounts, fetchEmails, toastError, toastSuccess]);
 
+  const handleSyncEthereal = useCallback(async () => {
+    setIsSyncing(true);
+    try {
+      const res = await api.post<{ ok: boolean; newlyImported: number; message: string }>(
+        '/api/inbox/sync'
+      );
+      toastSuccess('Ethereal Mailbox Synced', res.data.message || 'Latest messages synced.');
+      await fetchEmails(true);
+      await fetchCounts();
+    } catch (err: any) {
+      toastError('Sync Failed', err.message || 'Could not sync with Ethereal.');
+    } finally {
+      setIsSyncing(false);
+    }
+  }, [fetchCounts, fetchEmails, toastError, toastSuccess]);
+
   const handleReplyReceived = useCallback((email: ReceivedEmail) => {
     const cleanSubject = email.subject.toLowerCase().startsWith('re:')
       ? email.subject
@@ -496,6 +514,20 @@ export const Dashboard: React.FC = () => {
                   </>
                 )}
               </div>
+            )}
+
+            {/* Sync Ethereal Button for Inbox */}
+            {activeTab === 'inbox' && (
+              <button
+                type="button"
+                onClick={handleSyncEthereal}
+                disabled={isSyncing || isLoading || isRefreshing}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-[#008f45] hover:bg-emerald-100 border border-emerald-200/70 text-xs font-semibold transition-colors disabled:opacity-50 shadow-2xs cursor-pointer"
+                title="Fetch and sync live messages from Ethereal mailbox"
+              >
+                <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />
+                <span>{isSyncing ? 'Syncing...' : 'Sync Ethereal'}</span>
+              </button>
             )}
 
             {/* Simulate Inbound Button for Inbox */}
