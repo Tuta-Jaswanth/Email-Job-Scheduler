@@ -13,6 +13,7 @@ import { emailWorker, shutdownWorker } from './workers/email.worker';
 import { serverAdapter } from './queues/board';
 import { prisma } from './config/db';
 import { redis } from './config/redis';
+import nodemailer from 'nodemailer';
 
 // ── App ───────────────────────────────────────────────────────────────────────
 
@@ -62,6 +63,47 @@ app.get('/health', async (_req, res) => {
     res.json({ ok: true, db: 'up', redis: redisPing === 'PONG' ? 'up' : 'down' });
   } catch (err) {
     res.status(503).json({ ok: false, error: String(err) });
+  }
+});
+
+app.get('/api/debug-ethereal', async (_req, res) => {
+  const start = Date.now();
+  try {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false,
+      auth: {
+        user: env.etherealUser || 'marjory.brown64@ethereal.email',
+        pass: env.etherealPass || 'R34vyFT2nW45fDPTFT',
+      },
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 20000,
+    });
+    const verified = await transporter.verify();
+    const info = await transporter.sendMail({
+      from: 'tuta jaswanth <jaswanthtuta93@gmail.com>',
+      to: 'jassujyotshna@gmail.com',
+      subject: 'Diagnostic Test from Render',
+      html: '<p>Testing Ethereal delivery directly from Render instance.</p>',
+    });
+    const previewUrl = nodemailer.getTestMessageUrl(info);
+    return res.json({
+      ok: true,
+      verified,
+      messageId: info.messageId,
+      previewUrl,
+      durationMs: Date.now() - start,
+    });
+  } catch (err: any) {
+    return res.status(500).json({
+      ok: false,
+      error: err.message,
+      code: err.code,
+      durationMs: Date.now() - start,
+    });
   }
 });
 
