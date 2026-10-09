@@ -87,10 +87,10 @@ const ToastContainer: React.FC<{
         };
 
         const borders = {
-          success: 'border-emerald-200 bg-white text-emerald-950 shadow-emerald-50',
-          error: 'border-rose-200 bg-white text-rose-950 shadow-rose-50',
-          warning: 'border-amber-200 bg-white text-amber-950 shadow-amber-50',
-          info: 'border-blue-200 bg-white text-blue-950 shadow-blue-50',
+          success: 'border-emerald-200 dark:border-emerald-800/80 bg-white dark:bg-[#131b17] text-emerald-950 dark:text-emerald-100 shadow-emerald-50 dark:shadow-none',
+          error: 'border-rose-200 dark:border-rose-800/80 bg-white dark:bg-[#1f1315] text-rose-950 dark:text-rose-100 shadow-rose-50 dark:shadow-none',
+          warning: 'border-amber-200 dark:border-amber-800/80 bg-white dark:bg-[#1f1a12] text-amber-950 dark:text-amber-100 shadow-amber-50 dark:shadow-none',
+          info: 'border-blue-200 dark:border-blue-800/80 bg-white dark:bg-[#121820] text-blue-950 dark:text-blue-100 shadow-blue-50 dark:shadow-none',
         };
 
         return (
@@ -100,16 +100,16 @@ const ToastContainer: React.FC<{
           >
             {icons[toast.type]}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold leading-tight text-gray-900">{toast.title}</p>
+              <p className="text-sm font-semibold leading-tight text-gray-900 dark:text-white">{toast.title}</p>
               {toast.description && (
-                <p className="text-xs text-gray-600 mt-1 leading-relaxed break-words">
+                <p className="text-xs text-gray-600 dark:text-gray-300 mt-1 leading-relaxed break-words">
                   {toast.description}
                 </p>
               )}
             </div>
             <button
               onClick={() => onDismiss(toast.id)}
-              className="text-gray-400 hover:text-gray-600 p-1 rounded-md transition-colors"
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-md transition-colors cursor-pointer"
               aria-label="Dismiss toast"
             >
               <X className="w-4 h-4" />

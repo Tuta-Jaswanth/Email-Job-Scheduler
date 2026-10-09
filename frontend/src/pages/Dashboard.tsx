@@ -5,6 +5,7 @@ import { InboxTable } from '../components/dashboard/InboxTable';
 import { Compose } from '../components/compose/Compose';
 import { Detail } from '../components/detail/Detail';
 import { ReceivedDetail } from '../components/detail/ReceivedDetail';
+import { ThemeToggle } from '../components/common/ThemeToggle';
 import { api } from '../lib/api';
 import { Email, ReceivedEmail, TabType } from '../types';
 import { useAuth } from '../context/AuthContext';
@@ -357,7 +358,7 @@ export const Dashboard: React.FC = () => {
   }, [receivedEmails]);
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-white dark:bg-[#0b0f12] text-gray-900 dark:text-gray-100 transition-colors">
       {/* Sidebar (Left) */}
       <Sidebar
         user={user}
@@ -438,16 +439,16 @@ export const Dashboard: React.FC = () => {
         />
       ) : (
         /* Main Email List View */
-        <section className="flex-1 p-7 overflow-y-auto">
+        <section className="flex-1 p-7 overflow-y-auto bg-white dark:bg-[#0b0f12] transition-colors">
           {/* Top Search, Filter, Simulate & Refresh Bar */}
           <div className="flex items-center gap-3 mb-6">
             {/* Search Input */}
-            <div className="bg-[#f6f8f7] rounded-full px-4.5 py-2 flex items-center flex-1 max-w-2xl">
-              <Search size={16} className="text-gray-400 shrink-0 mr-2.5" />
+            <div className="bg-[#f6f8f7] dark:bg-[#151a21] border border-transparent dark:border-gray-800 rounded-full px-4.5 py-2 flex items-center flex-1 max-w-2xl transition-colors">
+              <Search size={16} className="text-gray-400 dark:text-gray-500 shrink-0 mr-2.5" />
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent outline-none text-sm text-gray-800 placeholder:text-gray-400 w-full"
+                className="bg-transparent outline-none text-sm text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 w-full"
                 placeholder={
                   activeTab === 'inbox'
                     ? 'Search received emails...'
@@ -460,7 +461,7 @@ export const Dashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="text-xs text-gray-400 hover:text-gray-600 ml-2"
+                  className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 ml-2 cursor-pointer"
                 >
                   ✕
                 </button>
@@ -473,10 +474,10 @@ export const Dashboard: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setFilterMenuOpen((prev) => !prev)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
                     inboxFilter !== 'all'
-                      ? 'border-[#00a651] text-[#00a651] bg-[#e8f7ef]/50'
-                      : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                      ? 'border-[#00a651] text-[#00a651] bg-[#e8f7ef]/50 dark:bg-emerald-950/40'
+                      : 'border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/60'
                   }`}
                   title="Filter messages"
                 >
@@ -491,7 +492,7 @@ export const Dashboard: React.FC = () => {
                       className="fixed inset-0 z-20"
                       onClick={() => setFilterMenuOpen(false)}
                     />
-                    <div className="absolute right-0 mt-1.5 w-36 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-30 text-xs animate-in fade-in zoom-in-95 duration-100">
+                    <div className="absolute right-0 mt-1.5 w-36 bg-white dark:bg-[#161c22] rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 py-1.5 z-30 text-xs animate-in fade-in zoom-in-95 duration-100">
                       {(['all', 'unread', 'starred'] as const).map((mode) => (
                         <button
                           key={mode}
@@ -500,10 +501,10 @@ export const Dashboard: React.FC = () => {
                             setInboxFilter(mode);
                             setFilterMenuOpen(false);
                           }}
-                          className={`w-full px-3 py-2 text-left flex items-center justify-between hover:bg-gray-50 transition-colors ${
+                          className={`w-full px-3 py-2 text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors cursor-pointer ${
                             inboxFilter === mode
-                              ? 'text-[#00a651] font-semibold'
-                              : 'text-gray-700'
+                              ? 'text-[#00a651] dark:text-emerald-400 font-semibold'
+                              : 'text-gray-700 dark:text-gray-200'
                           }`}
                         >
                           <span className="capitalize">{mode}</span>
@@ -522,7 +523,7 @@ export const Dashboard: React.FC = () => {
                 type="button"
                 onClick={handleSyncEthereal}
                 disabled={isSyncing || isLoading || isRefreshing}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-[#008f45] hover:bg-emerald-100 border border-emerald-200/70 text-xs font-semibold transition-colors disabled:opacity-50 shadow-2xs cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-[#008f45] dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 border border-emerald-200/70 dark:border-emerald-800/60 text-xs font-semibold transition-colors disabled:opacity-50 shadow-2xs cursor-pointer"
                 title="Fetch and sync live messages from Ethereal mailbox"
               >
                 <RefreshCw size={13} className={isSyncing ? 'animate-spin' : ''} />
@@ -536,7 +537,7 @@ export const Dashboard: React.FC = () => {
                 type="button"
                 onClick={handleSimulateInbound}
                 disabled={isSimulating}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#e8f7ef] text-[#008f45] hover:bg-[#d4f2e1] text-xs font-semibold transition-colors disabled:opacity-50 shadow-2xs cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#e8f7ef] dark:bg-emerald-950/30 text-[#008f45] dark:text-emerald-400 hover:bg-[#d4f2e1] dark:hover:bg-emerald-900/30 text-xs font-semibold transition-colors disabled:opacity-50 shadow-2xs cursor-pointer"
                 title="Simulate receiving a new prospect reply"
               >
                 <Sparkles size={13} className={isSimulating ? 'animate-spin' : ''} />
@@ -552,7 +553,7 @@ export const Dashboard: React.FC = () => {
                 fetchCounts();
               }}
               disabled={isLoading || isRefreshing}
-              className="text-gray-400 hover:text-gray-600 p-2 transition-colors disabled:opacity-50 rounded-full hover:bg-gray-50"
+              className="text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-2 transition-colors disabled:opacity-50 rounded-full hover:bg-gray-50 dark:hover:bg-gray-800/60 cursor-pointer"
               title="Refresh"
             >
               <RefreshCw
@@ -560,6 +561,11 @@ export const Dashboard: React.FC = () => {
                 className={isRefreshing ? 'animate-spin text-[#00a651]' : ''}
               />
             </button>
+
+            {/* Dark / Light Theme Toggle at the right corner */}
+            <div className="ml-auto pl-2 shrink-0">
+              <ThemeToggle />
+            </div>
           </div>
 
           {/* Table View: Inbox vs Outbox (Scheduled / Sent) */}

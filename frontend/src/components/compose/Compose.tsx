@@ -15,6 +15,7 @@ import { api } from '../../lib/api';
 import { Sender, ScheduleResponse, EmailAttachment } from '../../types';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
+import { ThemeToggle } from '../common/ThemeToggle';
 
 interface ComposeProps {
   onBack: () => void;
@@ -243,25 +244,25 @@ export const Compose: React.FC<ComposeProps> = ({
   };
 
   return (
-    <section className="flex-1 bg-white min-h-screen flex flex-col select-none relative">
+    <section className="flex-1 bg-white dark:bg-[#0b0f12] text-gray-900 dark:text-gray-100 min-h-screen flex flex-col select-none relative transition-colors">
       {/* Top Header matching Figma */}
-      <header className="h-[70px] border-b border-gray-200 flex items-center justify-between px-7 shrink-0">
+      <header className="h-[70px] border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-7 shrink-0 bg-white dark:bg-[#0e1215] transition-colors">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="text-gray-700 hover:text-gray-900 p-1 -ml-1 rounded-lg hover:bg-gray-100 transition-colors"
+            className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white p-1 -ml-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
           >
             <ArrowLeft size={19} />
           </button>
-          <h2 className="text-lg font-medium text-gray-900">Compose New Email</h2>
+          <h2 className="text-lg font-medium text-gray-900 dark:text-white">Compose New Email</h2>
         </div>
 
         {/* Right Action Icons & Send Later Button */}
-        <div className="flex items-center gap-5 relative">
+        <div className="flex items-center gap-4 relative">
           {/* Paperclip with Badge (Attachment Trigger) */}
           <div
             onClick={() => attachmentInputRef.current?.click()}
-            className="relative text-gray-400 hover:text-gray-600 cursor-pointer p-1 rounded-full hover:bg-gray-100 transition-colors"
+            className="relative text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 cursor-pointer p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             title="Attach files to email"
           >
             <Paperclip size={18} />
@@ -286,8 +287,8 @@ export const Compose: React.FC<ComposeProps> = ({
           <button
             type="button"
             onClick={() => setIsSendLaterOpen((prev) => !prev)}
-            className={`p-1 rounded-full transition-colors ${
-              scheduledTime ? 'text-[#00a651]' : 'text-gray-400 hover:text-gray-600'
+            className={`p-1.5 rounded-full transition-colors cursor-pointer ${
+              scheduledTime ? 'text-[#00a651] dark:text-emerald-400' : 'text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800'
             }`}
             title="Schedule Delivery Time"
           >
@@ -298,10 +299,15 @@ export const Compose: React.FC<ComposeProps> = ({
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="h-9 px-5 rounded-full border border-[#00a651] text-[#00a651] hover:bg-[#00a651] hover:text-white font-medium text-xs sm:text-sm flex items-center justify-center transition-all duration-150 active:scale-95 disabled:opacity-50"
+            className="h-9 px-5 rounded-full border border-[#00a651] text-[#00a651] hover:bg-[#00a651] hover:text-white font-medium text-xs sm:text-sm flex items-center justify-center transition-all duration-150 active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             {isSubmitting ? 'Scheduling...' : scheduledTime ? 'Send Later' : 'Send Later'}
           </button>
+
+          {/* Theme Toggle Button at Right Corner */}
+          <div className="pl-1">
+            <ThemeToggle />
+          </div>
 
           {/* "Send Later" Popover Modal (Figma Screenshot 3) */}
           {isSendLaterOpen && (
@@ -310,8 +316,8 @@ export const Compose: React.FC<ComposeProps> = ({
                 className="fixed inset-0 z-30"
                 onClick={() => setIsSendLaterOpen(false)}
               />
-              <div className="absolute right-0 top-12 w-[300px] bg-white rounded-2xl shadow-xl border border-gray-100 p-4 z-40 animate-in fade-in zoom-in-95 duration-100">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">Send Later</h4>
+              <div className="absolute right-0 top-12 w-[300px] bg-white dark:bg-[#161c22] rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-4 z-40 animate-in fade-in zoom-in-95 duration-100">
+                <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Send Later</h4>
 
                 {/* Custom Pick Date & Time */}
                 <div className="relative mb-3">
@@ -325,45 +331,45 @@ export const Compose: React.FC<ComposeProps> = ({
                       }
                     }}
                     placeholder="Pick date & time"
-                    className="w-full text-xs border border-gray-200 rounded-lg p-2.5 pr-8 text-gray-800 placeholder:text-gray-400 focus:outline-none focus:border-[#00a651]"
+                    className="w-full text-xs border border-gray-200 dark:border-gray-700 rounded-lg p-2.5 pr-8 text-gray-800 dark:text-gray-100 bg-white dark:bg-[#1a2128] placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-[#00a651]"
                   />
                   <Calendar size={15} className="absolute right-2.5 top-3 text-gray-400 pointer-events-none" />
                 </div>
 
                 {/* Quick Presets matching Figma Screenshot 3 */}
-                <div className="space-y-1 mb-4 text-xs text-gray-700">
+                <div className="space-y-1 mb-4 text-xs text-gray-700 dark:text-gray-300">
                   <button
                     type="button"
                     onClick={() => setPresetTomorrow(9)}
-                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
+                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
                   >
                     Tomorrow
                   </button>
                   <button
                     type="button"
                     onClick={() => setPresetTomorrow(10)}
-                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
+                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
                   >
                     Tomorrow, 10:00 AM
                   </button>
                   <button
                     type="button"
                     onClick={() => setPresetTomorrow(11)}
-                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
+                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
                   >
                     Tomorrow, 11:00 AM
                   </button>
                   <button
                     type="button"
                     onClick={() => setPresetTomorrow(15)}
-                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors"
+                    className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer"
                   >
                     Tomorrow, 3:00 PM
                   </button>
                 </div>
 
                 {/* Popover Actions */}
-                <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
+                <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-100 dark:border-gray-800">
                   <button
                     type="button"
                     onClick={() => {
@@ -371,14 +377,14 @@ export const Compose: React.FC<ComposeProps> = ({
                       setCustomDateTime('');
                       setIsSendLaterOpen(false);
                     }}
-                    className="text-xs text-gray-500 hover:text-gray-700 font-medium"
+                    className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 font-medium cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="button"
                     onClick={() => setIsSendLaterOpen(false)}
-                    className="px-4 py-1.5 rounded-full border border-[#00a651] text-[#00a651] hover:bg-[#00a651] hover:text-white text-xs font-semibold transition-colors"
+                    className="px-4 py-1.5 rounded-full border border-[#00a651] text-[#00a651] hover:bg-[#00a651] hover:text-white text-xs font-semibold transition-colors cursor-pointer"
                   >
                     Done
                   </button>
@@ -393,15 +399,15 @@ export const Compose: React.FC<ComposeProps> = ({
       <div className="flex-1 px-8 py-7 overflow-y-auto max-w-[1100px] w-full">
         {/* From Row matching Figma */}
         <div className="flex items-center gap-4 mb-5">
-          <span className="w-16 text-xs text-gray-400 font-medium">From</span>
+          <span className="w-16 text-xs text-gray-400 dark:text-gray-400 font-medium">From</span>
           <div className="relative">
             <button
               type="button"
               onClick={() => setSenderDropdownOpen((prev) => !prev)}
-              className="bg-[#f3f4f6] text-gray-800 text-xs font-medium px-3.5 py-1.5 rounded-md flex items-center gap-2 hover:bg-gray-200/80 transition-colors"
+              className="bg-[#f3f4f6] dark:bg-[#161c22] border border-transparent dark:border-gray-700 text-gray-800 dark:text-gray-200 text-xs font-medium px-3.5 py-1.5 rounded-md flex items-center gap-2 hover:bg-gray-200/80 dark:hover:bg-gray-800 transition-colors cursor-pointer"
             >
               <span>{selectedSender}</span>
-              <ChevronDown size={13} className="text-gray-500" />
+              <ChevronDown size={13} className="text-gray-500 dark:text-gray-400" />
             </button>
 
             {senderDropdownOpen && senders.length > 0 && (
@@ -410,7 +416,7 @@ export const Compose: React.FC<ComposeProps> = ({
                   className="fixed inset-0 z-10"
                   onClick={() => setSenderDropdownOpen(false)}
                 />
-                <div className="absolute left-0 mt-1 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-20 text-xs">
+                <div className="absolute left-0 mt-1 w-64 bg-white dark:bg-[#161c22] rounded-xl shadow-lg border border-gray-100 dark:border-gray-800 py-1 z-20 text-xs">
                   {senders.map((s) => (
                     <button
                       key={s.id}
@@ -419,7 +425,7 @@ export const Compose: React.FC<ComposeProps> = ({
                         setSelectedSender(s.email);
                         setSenderDropdownOpen(false);
                       }}
-                      className="w-full text-left px-3 py-2 hover:bg-gray-50 text-gray-700 truncate"
+                      className="w-full text-left px-3 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200 truncate cursor-pointer"
                     >
                       {s.name ? `${s.name} <${s.email}>` : s.email}
                     </button>
@@ -432,20 +438,20 @@ export const Compose: React.FC<ComposeProps> = ({
 
         {/* To Row matching Figma */}
         <div className="flex items-start gap-4 mb-5">
-          <span className="w-16 text-xs text-gray-400 font-medium pt-2">To</span>
-          <div className="flex-1 flex items-center justify-between border-b border-gray-100 pb-2.5 gap-3 flex-wrap">
+          <span className="w-16 text-xs text-gray-400 dark:text-gray-400 font-medium pt-2">To</span>
+          <div className="flex-1 flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-2.5 gap-3 flex-wrap">
             {/* Recipient Chips */}
             <div className="flex items-center gap-1.5 flex-wrap flex-1">
               {recipients.slice(0, 3).map((email) => (
                 <span
                   key={email}
-                  className="inline-flex items-center gap-1 border border-[#00a651] text-[#008c45] bg-white rounded-full px-3 py-0.5 text-xs font-medium"
+                  className="inline-flex items-center gap-1 border border-[#00a651] text-[#008c45] dark:text-emerald-400 bg-white dark:bg-[#161c22] rounded-full px-3 py-0.5 text-xs font-medium"
                 >
                   <span>{email}</span>
                   <button
                     type="button"
                     onClick={() => removeRecipient(email)}
-                    className="hover:text-rose-500 p-0.5 rounded-full"
+                    className="hover:text-rose-500 p-0.5 rounded-full cursor-pointer"
                   >
                     <X size={11} />
                   </button>
@@ -454,7 +460,7 @@ export const Compose: React.FC<ComposeProps> = ({
 
               {/* Overflow Chip: e.g. +4 */}
               {recipients.length > 3 && (
-                <span className="border border-[#00a651] text-[#008c45] bg-white rounded-full px-2.5 py-0.5 text-xs font-semibold">
+                <span className="border border-[#00a651] text-[#008c45] dark:text-emerald-400 bg-white dark:bg-[#161c22] rounded-full px-2.5 py-0.5 text-xs font-semibold">
                   +{recipients.length - 3}
                 </span>
               )}
@@ -473,7 +479,7 @@ export const Compose: React.FC<ComposeProps> = ({
                   }
                 }}
                 placeholder={recipients.length === 0 ? 'recipient@example.com' : 'Type recipient...'}
-                className="outline-none text-xs text-gray-800 placeholder:text-gray-400 flex-1 min-w-[140px] p-0.5"
+                className="outline-none text-xs text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 flex-1 min-w-[140px] p-0.5 bg-transparent"
               />
             </div>
 
@@ -508,18 +514,18 @@ export const Compose: React.FC<ComposeProps> = ({
         )}
 
         {/* Subject Row matching Figma */}
-        <div className="flex items-center gap-4 mb-5 border-b border-gray-100 pb-2">
-          <span className="w-16 text-xs text-gray-400 font-medium">Subject</span>
+        <div className="flex items-center gap-4 mb-5 border-b border-gray-100 dark:border-gray-800 pb-2">
+          <span className="w-16 text-xs text-gray-400 dark:text-gray-400 font-medium">Subject</span>
           <input
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
             placeholder="Subject"
-            className="flex-1 outline-none text-xs text-gray-800 placeholder:text-gray-400"
+            className="flex-1 outline-none text-xs text-gray-800 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 bg-transparent"
           />
         </div>
 
         {/* Pacing & Rate Limits Row matching Figma */}
-        <div className="flex items-center gap-8 mb-6 text-xs text-gray-700 flex-wrap">
+        <div className="flex items-center gap-8 mb-6 text-xs text-gray-700 dark:text-gray-300 flex-wrap">
           <div className="flex items-center gap-2.5">
             <span>Delay between 2 emails</span>
             <input
@@ -527,7 +533,7 @@ export const Compose: React.FC<ComposeProps> = ({
               value={delaySec}
               onChange={(e) => setDelaySec(e.target.value)}
               placeholder="00"
-              className="w-14 h-8 border border-gray-200 rounded-lg text-center text-xs text-gray-800 outline-none focus:border-[#00a651] bg-white"
+              className="w-14 h-8 border border-gray-200 dark:border-gray-700 rounded-lg text-center text-xs text-gray-800 dark:text-gray-100 outline-none focus:border-[#00a651] bg-white dark:bg-[#161c22]"
             />
           </div>
 
@@ -538,15 +544,15 @@ export const Compose: React.FC<ComposeProps> = ({
               value={hourlyLimit}
               onChange={(e) => setHourlyLimit(e.target.value)}
               placeholder="00"
-              className="w-14 h-8 border border-gray-200 rounded-lg text-center text-xs text-gray-800 outline-none focus:border-[#00a651] bg-white"
+              className="w-14 h-8 border border-gray-200 dark:border-gray-700 rounded-lg text-center text-xs text-gray-800 dark:text-gray-100 outline-none focus:border-[#00a651] bg-white dark:bg-[#161c22]"
             />
           </div>
         </div>
 
         {/* Attached Files List Bar */}
         {attachments.length > 0 && (
-          <div className="mb-4 p-3 rounded-xl bg-gray-50 border border-gray-200">
-            <div className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+          <div className="mb-4 p-3 rounded-xl bg-gray-50 dark:bg-[#13181d] border border-gray-200 dark:border-gray-800">
+            <div className="text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <Paperclip size={12} className="text-[#00a651]" />
               <span>Attached Files ({attachments.length})</span>
             </div>
@@ -554,7 +560,7 @@ export const Compose: React.FC<ComposeProps> = ({
               {attachments.map((file, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg py-1.5 px-3 shadow-2xs text-xs text-gray-800"
+                  className="flex items-center gap-2 bg-white dark:bg-[#182026] border border-gray-200 dark:border-gray-700/80 rounded-lg py-1.5 px-3 shadow-2xs text-xs text-gray-800 dark:text-gray-200"
                 >
                   {file.type.startsWith('image/') ? (
                     <ImageIcon size={14} className="text-sky-500 shrink-0" />
@@ -566,7 +572,7 @@ export const Compose: React.FC<ComposeProps> = ({
                   <button
                     type="button"
                     onClick={() => removeAttachment(idx)}
-                    className="text-gray-400 hover:text-rose-500 p-0.5 rounded-full"
+                    className="text-gray-400 hover:text-rose-500 p-0.5 rounded-full cursor-pointer"
                     title="Remove attachment"
                   >
                     <X size={12} />
@@ -586,10 +592,10 @@ export const Compose: React.FC<ComposeProps> = ({
               handleAttachmentUpload(e.dataTransfer.files);
             }
           }}
-          className="bg-[#f6f8f7] rounded-2xl min-h-[460px] p-6 flex flex-col relative"
+          className="bg-[#f6f8f7] dark:bg-[#13181d] border border-transparent dark:border-gray-800 rounded-2xl min-h-[460px] p-6 flex flex-col relative transition-colors"
         >
           {/* Floating Rich Formatting Toolbar matching Figma */}
-          <div className="bg-white rounded-full px-5 py-2 shadow-2xs border border-gray-100 flex items-center gap-3 text-gray-500 text-xs w-fit select-none mb-4">
+          <div className="bg-white dark:bg-[#1a2128] rounded-full px-5 py-2 shadow-2xs border border-gray-100 dark:border-gray-700/70 flex items-center gap-3 text-gray-500 dark:text-gray-300 text-xs w-fit select-none mb-4 transition-colors">
             <button
               type="button"
               onClick={() => executeCommand('undo')}
@@ -691,7 +697,7 @@ export const Compose: React.FC<ComposeProps> = ({
             contentEditable
             suppressContentEditableWarning
             onInput={(e) => setBodyHtml(e.currentTarget.innerHTML)}
-            className="flex-1 outline-none text-xs text-gray-800 leading-relaxed min-h-[340px]"
+            className="flex-1 outline-none text-xs text-gray-800 dark:text-gray-100 leading-relaxed min-h-[340px]"
             data-placeholder="Type your reply..."
           />
         </div>

@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
+import { ThemeToggle } from '../common/ThemeToggle';
 
 interface ReceivedDetailProps {
   email: ReceivedEmail;
@@ -133,11 +134,11 @@ export const ReceivedDetail: React.FC<ReceivedDetailProps> = ({
   return (
     <section className="flex-1 p-8 max-w-5xl mx-auto overflow-y-auto">
       {/* Top Header / Navigation Bar */}
-      <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 dark:border-gray-800">
         <button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors cursor-pointer group"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors cursor-pointer group"
         >
           <ArrowLeft
             size={18}
@@ -153,7 +154,7 @@ export const ReceivedDetail: React.FC<ReceivedDetailProps> = ({
             <button
               type="button"
               onClick={() => onReply(email)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#e8f7ef] text-[#008f45] hover:bg-[#d5f0e1] transition-colors shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#e8f7ef] dark:bg-emerald-950/60 text-[#008f45] dark:text-emerald-400 hover:bg-[#d5f0e1] dark:hover:bg-emerald-900/60 transition-colors shadow-2xs"
               title="Reply to this email"
             >
               <Reply size={14} />
@@ -165,7 +166,7 @@ export const ReceivedDetail: React.FC<ReceivedDetailProps> = ({
           <button
             type="button"
             onClick={handleToggleRead}
-            className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             title={email.isRead ? 'Mark as Unread' : 'Mark as Read'}
           >
             {email.isRead ? <Mail size={16} /> : <MailOpen size={16} />}
@@ -178,8 +179,8 @@ export const ReceivedDetail: React.FC<ReceivedDetailProps> = ({
             disabled={isStarring}
             className={`p-2 rounded-lg transition-colors ${
               email.isStarred
-                ? 'text-amber-400 hover:text-amber-500 hover:bg-amber-50'
-                : 'text-gray-400 hover:text-amber-500 hover:bg-gray-100'
+                ? 'text-amber-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/30'
+                : 'text-gray-400 hover:text-amber-500 hover:bg-gray-100 dark:hover:bg-gray-800'
             }`}
             title={email.isStarred ? 'Remove Star' : 'Star Email'}
           >
@@ -194,43 +195,46 @@ export const ReceivedDetail: React.FC<ReceivedDetailProps> = ({
             type="button"
             onClick={handleDelete}
             disabled={isDeleting}
-            className="p-2 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-50"
+            className="p-2 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors disabled:opacity-50"
             title="Delete Email"
           >
             <Trash2 size={16} />
           </button>
+
+          {/* Dark / Light Theme Toggle at the right corner */}
+          <ThemeToggle />
         </div>
       </div>
 
       {/* Main Email Card */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-xs p-7 mb-6">
+      <div className="bg-white dark:bg-[#13181d] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xs p-7 mb-6 transition-colors">
         {/* Subject Header */}
         <div className="flex items-start justify-between gap-4 mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight leading-snug">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight leading-snug">
             {email.subject}
           </h1>
-          <span className="bg-[#e8f7ef] text-[#008f45] text-xs font-semibold px-3 py-1 rounded-full shrink-0">
+          <span className="bg-[#e8f7ef] dark:bg-[#00a651]/20 text-[#008f45] dark:text-emerald-400 text-xs font-semibold px-3 py-1 rounded-full shrink-0">
             Received
           </span>
         </div>
 
         {/* Sender & Recipient Metadata */}
-        <div className="flex items-center justify-between pb-6 mb-6 border-b border-gray-100 flex-wrap gap-4">
+        <div className="flex items-center justify-between pb-6 mb-6 border-b border-gray-100 dark:border-gray-800 flex-wrap gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#e8f7ef] text-[#008f45] font-bold text-sm flex items-center justify-center shrink-0 shadow-inner">
+            <div className="w-10 h-10 rounded-full bg-[#e8f7ef] dark:bg-emerald-950/60 text-[#008f45] dark:text-emerald-400 font-bold text-sm flex items-center justify-center shrink-0 shadow-inner">
               {senderDisplayName.slice(0, 2).toUpperCase()}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-sm text-gray-900">
+                <span className="font-semibold text-sm text-gray-900 dark:text-white">
                   {senderDisplayName}
                 </span>
-                <span className="text-xs text-gray-400">
+                <span className="text-xs text-gray-400 dark:text-gray-400">
                   &lt;{email.fromEmail}&gt;
                 </span>
               </div>
-              <div className="text-xs text-gray-500 mt-0.5">
-                To: <span className="font-medium text-gray-700">{email.to}</span>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                To: <span className="font-medium text-gray-700 dark:text-gray-300">{email.to}</span>
               </div>
             </div>
           </div>

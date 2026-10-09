@@ -30,11 +30,11 @@ export const Button: React.FC<ButtonProps> = ({
     primary:
       'bg-[#00a651] text-white hover:bg-[#008f45] active:bg-[#00783a] focus:ring-[#00a651]/40 shadow-sm shadow-[#00a651]/20',
     secondary:
-      'bg-gray-100 text-gray-800 hover:bg-gray-200 active:bg-gray-300 focus:ring-gray-300',
+      'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 active:bg-gray-300 focus:ring-gray-300',
     outline:
-      'border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100 focus:ring-gray-300 shadow-sm',
+      'border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#161c22] text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 active:bg-gray-100 focus:ring-gray-300 shadow-sm',
     ghost:
-      'text-gray-600 hover:bg-gray-100 active:bg-gray-200 focus:ring-gray-200',
+      'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 focus:ring-gray-200',
     danger:
       'bg-rose-600 text-white hover:bg-rose-700 active:bg-rose-800 focus:ring-rose-500 shadow-sm shadow-rose-600/20',
   };

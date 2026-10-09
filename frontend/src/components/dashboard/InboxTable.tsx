@@ -80,12 +80,12 @@ export const InboxTable: React.FC<InboxTableProps> = ({
   if (emails.length === 0) {
     if (isFiltered) {
       return (
-        <div className="py-20 px-4 text-center bg-white rounded-2xl border border-gray-100 shadow-xs">
-          <div className="w-12 h-12 mx-auto rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mb-4">
+        <div className="py-20 px-4 text-center bg-white dark:bg-[#13181d] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xs transition-colors">
+          <div className="w-12 h-12 mx-auto rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 flex items-center justify-center mb-4">
             <Inbox className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-semibold text-gray-900">No matching received emails</h3>
-          <p className="text-sm text-gray-500 mt-1 max-w-sm mx-auto">
+          <h3 className="text-base font-semibold text-gray-900 dark:text-white">No matching received emails</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-sm mx-auto">
             We couldn't find any received emails matching your search criteria.
           </p>
           {onClearFilter && (
@@ -100,12 +100,12 @@ export const InboxTable: React.FC<InboxTableProps> = ({
     }
 
     return (
-      <div className="py-20 px-4 text-center bg-white rounded-2xl border border-gray-100 shadow-xs">
-        <div className="w-14 h-14 mx-auto rounded-2xl bg-[#e7f7ee] text-[#00a651] flex items-center justify-center mb-4 shadow-inner">
+      <div className="py-20 px-4 text-center bg-white dark:bg-[#13181d] rounded-2xl border border-gray-100 dark:border-gray-800 shadow-xs transition-colors">
+        <div className="w-14 h-14 mx-auto rounded-2xl bg-[#e7f7ee] dark:bg-emerald-950/60 text-[#00a651] dark:text-emerald-400 flex items-center justify-center mb-4 shadow-inner">
           <Inbox className="w-7 h-7" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900">Your Inbox is empty</h3>
-        <p className="text-sm text-gray-500 mt-1.5 max-w-md mx-auto leading-relaxed">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Your Inbox is empty</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5 max-w-md mx-auto leading-relaxed">
           Incoming responses to your scheduled campaigns and test replies will arrive here.
         </p>
         {onSimulateInbound && (
@@ -126,7 +126,7 @@ export const InboxTable: React.FC<InboxTableProps> = ({
   }
 
   return (
-    <div className="divide-y divide-gray-100 bg-white">
+    <div className="divide-y divide-gray-100 dark:divide-gray-800/70 bg-white dark:bg-[#0b0f12] transition-colors">
       {emails.map((email) => {
         const isUnread = !email.isRead;
 
@@ -134,15 +134,15 @@ export const InboxTable: React.FC<InboxTableProps> = ({
           <div
             key={email.id}
             onClick={() => onSelectEmail(email)}
-            className={`py-3.5 px-3 flex items-center gap-4 hover:bg-gray-50/80 cursor-pointer transition-colors duration-100 group select-none rounded-lg ${
-              isUnread ? 'bg-[#f4fbf7]/40' : ''
+            className={`py-3.5 px-3 flex items-center gap-4 hover:bg-gray-50/80 dark:hover:bg-[#161c22]/80 cursor-pointer transition-colors duration-100 group select-none rounded-lg ${
+              isUnread ? 'bg-[#f4fbf7]/40 dark:bg-[#00a651]/5' : ''
             }`}
           >
             {/* Unread indicator dot */}
             <div className="w-2.5 h-2.5 shrink-0 flex items-center justify-center">
               {isUnread && (
                 <span
-                  className="w-2 h-2 rounded-full bg-[#00a651]"
+                  className="w-2 h-2 rounded-full bg-[#00a651] dark:bg-emerald-400"
                   title="Unread"
                 />
               )}
@@ -152,7 +152,9 @@ export const InboxTable: React.FC<InboxTableProps> = ({
             <div className="w-52 shrink-0 truncate">
               <span
                 className={`text-sm ${
-                  isUnread ? 'font-bold text-gray-950' : 'font-medium text-gray-700'
+                  isUnread
+                    ? 'font-bold text-gray-950 dark:text-white'
+                    : 'font-medium text-gray-700 dark:text-gray-300'
                 }`}
               >
                 {email.from.split('<')[0].trim() || email.fromEmail}
@@ -163,8 +165,8 @@ export const InboxTable: React.FC<InboxTableProps> = ({
             <span
               className={`text-xs px-2.5 py-1 rounded-full shrink-0 font-medium ${
                 isUnread
-                  ? 'bg-[#e8f7ef] text-[#008f45]'
-                  : 'bg-gray-100 text-gray-500'
+                  ? 'bg-[#e8f7ef] dark:bg-[#00a651]/20 text-[#008f45] dark:text-emerald-400'
+                  : 'bg-gray-100 dark:bg-[#1c232b] text-gray-500 dark:text-gray-400'
               }`}
             >
               {formatReceivedTime(email.receivedAt)}
@@ -174,20 +176,22 @@ export const InboxTable: React.FC<InboxTableProps> = ({
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <span
                 className={`text-sm truncate shrink-0 max-w-[280px] ${
-                  isUnread ? 'font-semibold text-gray-950' : 'font-medium text-gray-800'
+                  isUnread
+                    ? 'font-semibold text-gray-950 dark:text-white'
+                    : 'font-medium text-gray-800 dark:text-gray-200'
                 }`}
               >
                 {email.subject}
               </span>
-              <span className="text-gray-400 text-sm truncate">
+              <span className="text-gray-400 dark:text-gray-400 text-sm truncate">
                 - {getSnippet(email.bodyText, email.bodyHtml)}
               </span>
               {Array.isArray(email.attachments) && email.attachments.length > 0 && (
                 <span
-                  className="inline-flex items-center gap-0.5 text-gray-400 hover:text-gray-600 shrink-0 ml-1 text-xs"
+                  className="inline-flex items-center gap-0.5 text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 shrink-0 ml-1 text-xs"
                   title={`${email.attachments.length} attachment(s)`}
                 >
-                  <Paperclip size={12} className="text-[#00a651]" />
+                  <Paperclip size={12} className="text-[#00a651] dark:text-emerald-400" />
                 </span>
               )}
             </div>

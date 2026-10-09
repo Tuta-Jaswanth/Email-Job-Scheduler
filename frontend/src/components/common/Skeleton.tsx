@@ -1,13 +1,13 @@
 import React from 'react';
 
 export const Skeleton: React.FC<{ className?: string }> = ({ className = '' }) => {
-  return <div className={`animate-pulse bg-gray-200/80 rounded-md ${className}`} />;
+  return <div className={`animate-pulse bg-gray-200/80 dark:bg-gray-800/80 rounded-md ${className}`} />;
 };
 
 export const TableSkeleton: React.FC<{ rows?: number }> = ({ rows = 5 }) => {
   return (
-    <div className="w-full divide-y divide-gray-100 border border-gray-100 rounded-xl overflow-hidden bg-white shadow-sm">
-      <div className="bg-gray-50/75 px-6 py-3.5 flex items-center gap-4">
+    <div className="w-full divide-y divide-gray-100 dark:divide-gray-800 border border-gray-100 dark:border-gray-800 rounded-xl overflow-hidden bg-white dark:bg-[#13181d] shadow-sm transition-colors">
+      <div className="bg-gray-50/75 dark:bg-[#182026] px-6 py-3.5 flex items-center gap-4">
         <Skeleton className="h-4 w-32" />
         <Skeleton className="h-4 w-48 hidden md:block" />
         <Skeleton className="h-4 w-28 ml-auto" />

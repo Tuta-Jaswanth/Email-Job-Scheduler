@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
+import { ThemeToggle } from '../common/ThemeToggle';
 
 interface DetailProps {
   email: Email;
@@ -217,18 +218,18 @@ export const Detail: React.FC<DetailProps> = ({
   };
 
   return (
-    <section className="flex-1 bg-white min-h-screen flex flex-col relative">
+    <section className="flex-1 bg-white dark:bg-[#0b0f12] text-gray-900 dark:text-gray-100 min-h-screen flex flex-col relative transition-colors">
       {/* Top Header */}
-      <header className="h-[75px] border-b border-gray-200 px-7 flex items-center justify-between shrink-0">
+      <header className="h-[75px] border-b border-gray-200 dark:border-gray-800 px-7 flex items-center justify-between shrink-0 bg-white dark:bg-[#0e1215] transition-colors">
         <div className="flex items-center gap-4 min-w-0">
           <button
             onClick={onBack}
-            className="text-gray-700 hover:text-gray-900 p-1.5 -ml-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+            className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white p-1.5 -ml-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors cursor-pointer"
             title="Back to email list"
           >
             <ArrowLeft size={20} />
           </button>
-          <h2 className="text-xl font-medium text-gray-900 truncate">
+          <h2 className="text-xl font-medium text-gray-900 dark:text-white truncate">
             {email.subject}
           </h2>
           <div className="ml-1 shrink-0">{statusBadge()}</div>
@@ -238,7 +239,7 @@ export const Detail: React.FC<DetailProps> = ({
           {/* Attachment count indicator in header */}
           {attachments.length > 0 && (
             <div
-              className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full font-medium"
+              className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-full font-medium"
               title={`${attachments.length} attached file(s)`}
             >
               <Paperclip size={13} className="text-[#00a651]" />
@@ -251,10 +252,10 @@ export const Detail: React.FC<DetailProps> = ({
             type="button"
             onClick={handleToggleStar}
             disabled={isStarring}
-            className={`p-1.5 rounded-lg transition-colors ${
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
               email.isStarred
-                ? 'text-amber-400 hover:text-amber-500 bg-amber-50/50'
-                : 'hover:text-amber-400 hover:bg-gray-50'
+                ? 'text-amber-400 hover:text-amber-500 bg-amber-50/50 dark:bg-amber-950/30'
+                : 'hover:text-amber-400 hover:bg-gray-50 dark:hover:bg-gray-800'
             }`}
             title={email.isStarred ? 'Unstar email' : 'Star email'}
           >
@@ -269,7 +270,7 @@ export const Detail: React.FC<DetailProps> = ({
             <button
               onClick={handleCancel}
               disabled={isCancelling}
-              className="hover:text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium disabled:opacity-50"
+              className="hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 p-1.5 rounded-lg transition-colors flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400 disabled:opacity-50 cursor-pointer"
               title="Cancel email schedule"
             >
               <XCircle size={18} />
@@ -283,7 +284,7 @@ export const Detail: React.FC<DetailProps> = ({
               type="button"
               onClick={handleRetry}
               disabled={isRetrying}
-              className="hover:text-[#00a651] hover:bg-emerald-50 p-1.5 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold text-emerald-700 disabled:opacity-50"
+              className="hover:text-[#00a651] hover:bg-emerald-50 dark:hover:bg-emerald-950/40 p-1.5 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400 disabled:opacity-50 cursor-pointer"
               title="Retry sending this email"
             >
               <RotateCw size={16} className={isRetrying ? 'animate-spin text-[#00a651]' : ''} />
@@ -296,7 +297,7 @@ export const Detail: React.FC<DetailProps> = ({
             type="button"
             onClick={handleDelete}
             disabled={isDeleting}
-            className="hover:text-rose-600 hover:bg-rose-50 p-1.5 rounded-lg transition-colors disabled:opacity-50"
+            className="hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 p-1.5 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
             title="Delete email permanently"
           >
             <Trash2 size={18} />
@@ -308,14 +309,19 @@ export const Detail: React.FC<DetailProps> = ({
               <img
                 src={user.avatar}
                 alt={user.name || 'User'}
-                className="w-8 h-8 rounded-full object-cover ring-1 ring-gray-200"
+                className="w-8 h-8 rounded-full object-cover ring-1 ring-gray-200 dark:ring-gray-700"
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <div className="w-8 h-8 rounded-full bg-emerald-100 text-[#008f45] font-semibold text-xs flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-[#008f45] dark:text-emerald-400 font-semibold text-xs flex items-center justify-center">
                 {user?.name?.slice(0, 2).toUpperCase() || 'U'}
               </div>
             )}
+          </div>
+
+          {/* Theme Toggle Button at Right Corner */}
+          <div className="pl-1">
+            <ThemeToggle />
           </div>
         </div>
       </header>
@@ -329,13 +335,13 @@ export const Detail: React.FC<DetailProps> = ({
               {senderInitial}
             </div>
             <div>
-              <div className="text-sm font-semibold text-gray-900 flex items-center gap-1.5">
+              <div className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-1.5">
                 <span>{senderName}</span>
-                <span className="text-gray-400 font-normal text-xs">&lt;{senderEmail}&gt;</span>
+                <span className="text-gray-400 dark:text-gray-500 font-normal text-xs">&lt;{senderEmail}&gt;</span>
               </div>
-              <div className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+              <div className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1 mt-0.5">
                 <span>to</span>
-                <span className="font-medium text-gray-600">{email.recipient}</span>
+                <span className="font-medium text-gray-600 dark:text-gray-300">{email.recipient}</span>
                 <ChevronDown size={13} />
               </div>
             </div>
@@ -372,17 +378,17 @@ export const Detail: React.FC<DetailProps> = ({
 
         {/* Email Body */}
         <div
-          className="text-sm leading-relaxed text-gray-800 prose prose-sm max-w-none pt-2 border-t border-gray-100 min-h-[140px]"
+          className="text-sm leading-relaxed text-gray-800 dark:text-gray-200 prose prose-sm dark:prose-invert max-w-none pt-2 border-t border-gray-100 dark:border-gray-800 min-h-[140px]"
           dangerouslySetInnerHTML={{ __html: email.bodyHtml }}
         />
 
         {/* Attached Files Section */}
         {attachments.length > 0 && (
-          <div className="pt-6 border-t border-gray-200">
+          <div className="pt-6 border-t border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Paperclip size={16} className="text-[#00a651]" />
-                <h3 className="text-sm font-semibold text-gray-900">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
                   Attachments ({attachments.length})
                 </h3>
               </div>
@@ -407,7 +413,7 @@ export const Detail: React.FC<DetailProps> = ({
                 return (
                   <div
                     key={idx}
-                    className="border border-gray-200 rounded-xl p-3 bg-gray-50/60 hover:bg-gray-50 hover:border-gray-300 transition-all flex flex-col justify-between group relative overflow-hidden shadow-2xs"
+                    className="border border-gray-200 dark:border-gray-800 rounded-xl p-3 bg-gray-50/60 dark:bg-[#13181d] hover:bg-gray-50 dark:hover:bg-[#182026] hover:border-gray-300 dark:hover:border-gray-700 transition-all flex flex-col justify-between group relative overflow-hidden shadow-2xs"
                   >
                     {/* Image Preview Thumbnail if Image */}
                     {isImage && hasPreviewUrl && (
@@ -418,7 +424,7 @@ export const Detail: React.FC<DetailProps> = ({
                             name: file.name,
                           })
                         }
-                        className="w-full h-28 mb-2.5 rounded-lg overflow-hidden bg-gray-100 cursor-pointer relative group/img"
+                        className="w-full h-28 mb-2.5 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 cursor-pointer relative group/img"
                       >
                         <img
                           src={file.dataUrl || file.url}
@@ -434,12 +440,12 @@ export const Detail: React.FC<DetailProps> = ({
 
                     {/* File Info Row */}
                     <div className="flex items-start gap-2.5 min-w-0">
-                      <div className="p-1.5 rounded-lg bg-white border border-gray-100 shrink-0">
+                      <div className="p-1.5 rounded-lg bg-white dark:bg-[#1a2128] border border-gray-100 dark:border-gray-800 shrink-0">
                         {getFileIcon(file)}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p
-                          className="text-xs font-semibold text-gray-900 truncate"
+                          className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate"
                           title={file.name}
                         >
                           {file.name}
@@ -451,7 +457,7 @@ export const Detail: React.FC<DetailProps> = ({
                     </div>
 
                     {/* Card Actions */}
-                    <div className="flex items-center justify-end gap-2 mt-3 pt-2 border-t border-gray-200/60">
+                    <div className="flex items-center justify-end gap-2 mt-3 pt-2 border-t border-gray-200/60 dark:border-gray-800">
                       {isImage && hasPreviewUrl && (
                         <button
                           type="button"
@@ -461,7 +467,7 @@ export const Detail: React.FC<DetailProps> = ({
                               name: file.name,
                             })
                           }
-                          className="p-1 text-gray-500 hover:text-[#00a651] rounded-md hover:bg-white text-xs font-medium flex items-center gap-1"
+                          className="p-1 text-gray-500 dark:text-gray-400 hover:text-[#00a651] dark:hover:text-emerald-400 rounded-md hover:bg-white dark:hover:bg-gray-800 text-xs font-medium flex items-center gap-1 cursor-pointer"
                           title="Preview full image"
                         >
                           <Eye size={13} />
@@ -471,7 +477,7 @@ export const Detail: React.FC<DetailProps> = ({
                       <button
                         type="button"
                         onClick={() => handleDownload(file)}
-                        className="p-1 text-gray-600 hover:text-[#00a651] rounded-md hover:bg-white text-xs font-medium flex items-center gap-1"
+                        className="p-1 text-gray-600 dark:text-gray-300 hover:text-[#00a651] dark:hover:text-emerald-400 rounded-md hover:bg-white dark:hover:bg-gray-800 text-xs font-medium flex items-center gap-1 cursor-pointer"
                         title="Download attachment"
                       >
                         <Download size={13} />

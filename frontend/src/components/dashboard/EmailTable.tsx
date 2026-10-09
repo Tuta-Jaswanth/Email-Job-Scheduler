@@ -67,42 +67,42 @@ export const EmailTable: React.FC<EmailTableProps> = ({
   }
 
   return (
-    <div className="divide-y divide-gray-100 bg-white">
+    <div className="divide-y divide-gray-100 dark:divide-gray-800/70 bg-white dark:bg-[#0b0f12] transition-colors">
       {emails.map((email) => {
         return (
           <div
             key={email.id}
             onClick={() => onSelectEmail(email)}
-            className="py-4 px-2 flex items-center gap-5 hover:bg-gray-50/80 cursor-pointer transition-colors duration-100 group select-none"
+            className="py-4 px-2 flex items-center gap-5 hover:bg-gray-50/80 dark:hover:bg-[#161c22]/80 cursor-pointer transition-colors duration-100 group select-none rounded-lg"
           >
             {/* Recipient */}
-            <div className="w-48 text-sm font-medium text-gray-900 truncate shrink-0">
+            <div className="w-48 text-sm font-medium text-gray-900 dark:text-white truncate shrink-0">
               To: {email.recipient}
             </div>
 
             {/* Status Pill (Figma design) */}
             {tab === 'scheduled' ? (
-              <span className="bg-[#fef3eb] text-[#ea580c] text-xs px-3 py-1 rounded-full flex items-center gap-1.5 shrink-0 font-medium">
+              <span className="bg-[#fef3eb] dark:bg-amber-950/40 text-[#ea580c] dark:text-amber-400 text-xs px-3 py-1 rounded-full flex items-center gap-1.5 shrink-0 font-medium">
                 <Clock3 size={12} className="shrink-0" />
                 <span>{formatScheduledTime(email.scheduledAt)}</span>
               </span>
             ) : email.status === 'FAILED' ? (
-              <span className="bg-rose-50 text-rose-600 text-xs px-3 py-1 rounded-full shrink-0 font-medium">
+              <span className="bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-xs px-3 py-1 rounded-full shrink-0 font-medium">
                 Failed
               </span>
             ) : (
-              <span className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full shrink-0 font-medium">
+              <span className="bg-gray-100 dark:bg-[#1c232b] text-gray-600 dark:text-gray-400 text-xs px-3 py-1 rounded-full shrink-0 font-medium">
                 Sent
               </span>
             )}
 
             {/* Subject and Snippet */}
             <div className="flex items-center gap-2 min-w-0 flex-1">
-              <span className="font-medium text-sm text-gray-900 truncate shrink-0 max-w-[280px]">
+              <span className="font-medium text-sm text-gray-900 dark:text-white truncate shrink-0 max-w-[280px]">
                 {email.subject}
               </span>
               {email.bodyHtml && (
-                <span className="text-gray-400 text-sm truncate">
+                <span className="text-gray-400 dark:text-gray-400 text-sm truncate">
                   - {getSnippet(email.bodyHtml)}
                 </span>
               )}
@@ -131,7 +131,7 @@ export const EmailTable: React.FC<EmailTableProps> = ({
                     e.stopPropagation();
                     onDeleteEmail(email);
                   }}
-                  className="opacity-0 group-hover:opacity-100 text-gray-300 hover:text-rose-600 p-1 rounded-md hover:bg-rose-50 transition-all duration-150"
+                  className="opacity-0 group-hover:opacity-100 text-gray-400 dark:text-gray-500 hover:text-rose-600 dark:hover:text-rose-400 p-1 rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all duration-150 cursor-pointer"
                   title="Delete email"
                   aria-label="Delete email"
                 >
@@ -146,10 +146,10 @@ export const EmailTable: React.FC<EmailTableProps> = ({
                   e.stopPropagation();
                   if (onToggleStar) onToggleStar(email);
                 }}
-                className={`p-1 rounded-md transition-all duration-150 ${
+                className={`p-1 rounded-md transition-all duration-150 cursor-pointer ${
                   email.isStarred
                     ? 'text-amber-400 hover:text-amber-500'
-                    : 'text-gray-300 hover:text-amber-400'
+                    : 'text-gray-300 dark:text-gray-600 hover:text-amber-400'
                 }`}
                 title={email.isStarred ? 'Remove from starred' : 'Add to starred'}
                 aria-label="Star email"

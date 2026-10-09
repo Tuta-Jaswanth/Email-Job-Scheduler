@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { getGoogleLoginUrl } from '../../lib/api';
+import { ThemeToggle } from '../common/ThemeToggle';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -13,13 +14,18 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-white p-4">
+    <main className="min-h-screen flex items-center justify-center bg-white dark:bg-[#0b0f12] text-gray-900 dark:text-gray-100 p-4 transition-colors relative">
+      {/* Theme Toggle at the top-right corner */}
+      <div className="fixed top-5 right-6 z-50">
+        <ThemeToggle />
+      </div>
+
       {/* Outer Card Container */}
-      <div className="border border-gray-200 rounded-2xl p-10 sm:p-12 shadow-sm bg-white">
+      <div className="border border-gray-200 dark:border-gray-800 rounded-2xl p-10 sm:p-12 shadow-sm bg-white dark:bg-[#13181d] transition-colors">
         {/* Form Container (Fixed 380px, Vertical flow, 28px Gap) */}
         <div className="w-[380px] flex flex-col gap-[28px]">
           {/* Title */}
-          <h1 className="text-[36px] font-bold text-center text-[#111827] leading-none tracking-tight">
+          <h1 className="text-[36px] font-bold text-center text-[#111827] dark:text-white leading-none tracking-tight">
             Login
           </h1>
 
@@ -64,7 +70,7 @@ export const LoginPage: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email ID"
-              className="h-[46px] w-full px-4 rounded-lg bg-[#f3f4f6] text-sm text-gray-900 placeholder:text-gray-400 border border-transparent focus:border-gray-300 focus:bg-white focus:outline-none transition-all"
+              className="h-[46px] w-full px-4 rounded-lg bg-[#f3f4f6] dark:bg-[#1a2128] text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 border border-transparent dark:border-gray-700/60 focus:border-gray-300 dark:focus:border-gray-600 focus:bg-white dark:focus:bg-[#1f2730] focus:outline-none transition-all"
             />
 
             {/* Password Input */}
@@ -73,7 +79,7 @@ export const LoginPage: React.FC = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              className="h-[46px] w-full px-4 rounded-lg bg-[#f3f4f6] text-sm text-gray-900 placeholder:text-gray-400 border border-transparent focus:border-gray-300 focus:bg-white focus:outline-none transition-all"
+              className="h-[46px] w-full px-4 rounded-lg bg-[#f3f4f6] dark:bg-[#1a2128] text-sm text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 border border-transparent dark:border-gray-700/60 focus:border-gray-300 dark:focus:border-gray-600 focus:bg-white dark:focus:bg-[#1f2730] focus:outline-none transition-all"
             />
 
             {/* Primary Login Button */}
