@@ -94,6 +94,18 @@ async function start() {
     console.warn('[Elasticsearch] Init skipped:', String(err?.message || err)),
   );
 
+  // Auto-sync database tables on startup
+  if (env.dbUrl) {
+    try {
+      console.log('🔄 Verifying and syncing database schema tables...');
+      const { execSync } = await import('node:child_process');
+      execSync('npx prisma db push --skip-generate', { stdio: 'inherit' });
+      console.log('✅ Database schema verified.');
+    } catch (err: any) {
+      console.warn('[Prisma] Database sync note:', String(err?.message || err));
+    }
+  }
+
   // Clean up any legacy dummy sender (non-fatal)
   if (env.dbUrl) {
     await prisma.sender.deleteMany({

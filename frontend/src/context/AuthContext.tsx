@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         missing_oauth_response: 'Incomplete OAuth response from Google.',
         access_denied: 'Access was denied by Google authentication.',
       };
-      toastError('Login Failed', errorMessages[authError] || `Authentication error: ${authError}`);
+      toastError('Login Failed', errorMessages[authError] || decodeURIComponent(authError));
     }
 
     if (slackStatus === 'connected') {

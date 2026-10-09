@@ -213,9 +213,10 @@ router.get(['/google/callback', '/callback/google'], async (req: Request, res: R
     // Dual return: Also pass token in URL so frontend can store in localStorage
     // This makes login 100% bulletproof even if Safari/Chrome blocks cross-domain cookies
     return res.redirect(`${targetFrontend}/?token=${accessToken}`);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Google OAuth callback failed:', error);
-    return res.redirect(`${fallbackFrontend}/?authError=google_login_failed`);
+    const reason = encodeURIComponent(error?.message || 'google_login_failed');
+    return res.redirect(`${fallbackFrontend}/?authError=${reason}`);
   }
 });
 
