@@ -41,5 +41,10 @@ api.interceptors.response.use(
 );
 
 export const getGoogleLoginUrl = (): string => `${API_BASE_URL}/auth/google`;
-export const getSlackConnectUrl = (): string => `${API_BASE_URL}/api/slack/connect`;
+export const getSlackConnectUrl = (): string => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('reachinbox_token') : null;
+  return token
+    ? `${API_BASE_URL}/api/slack/connect?token=${encodeURIComponent(token)}`
+    : `${API_BASE_URL}/api/slack/connect`;
+};
 

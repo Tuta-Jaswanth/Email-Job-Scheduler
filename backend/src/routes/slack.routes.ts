@@ -4,6 +4,7 @@ import { auth } from '../middleware/auth';
 import { env } from '../config/env';
 import { prisma } from '../config/db';
 import { logger } from '../utils/logger';
+import { notifySlack } from '../services/slack.service';
 
 const router = Router();
 
@@ -22,7 +23,7 @@ router.get('/connect', auth, (req: Request, res: Response) => {
 
   const url = new URL('https://slack.com/oauth/v2/authorize');
   url.searchParams.set('client_id', env.slackClientId);
-  url.searchParams.set('scope', 'chat:write,chat:write.public');
+  url.searchParams.set('scope', 'chat:write,chat:write.public,incoming-webhook');
   url.searchParams.set('redirect_uri', env.slackRedirect);
   url.searchParams.set('state', userId);
 
@@ -62,17 +63,57 @@ router.get('/callback', async (req: Request, res: Response) => {
     }
 
     const accessToken = response.data.access_token;
+    const webhookUrl = response.data.incoming_webhook?.url;
+    // Prefer webhookUrl because it delivers directly to the channel selected by the user
+    const storedToken = webhookUrl || accessToken;
+
     await prisma.user.update({
       where: { id: userId },
-      data: { slackAccessToken: accessToken },
+      data: { slackAccessToken: storedToken },
     });
 
-    logger.info('slack.connected', { userId });
+    logger.info('slack.connected', { userId, hasWebhook: Boolean(webhookUrl) });
+
+    // Send a real welcome message to confirm connection
+    await notifySlack(
+      userId,
+      '🎉 *Slack Connected to ReachInbox!* You will receive real-time notifications here whenever a sender reaches their hourly rate limit.'
+    ).catch(() => {});
+
     return res.redirect(`${env.frontendUrl}/?slack=connected`);
   } catch (error) {
     logger.error('slack.callback.error', { error: String(error) });
     return res.redirect(`${env.frontendUrl}/?slack=error`);
   }
+});
+
+/**
+ * Connect Slack via Incoming Webhook URL
+ */
+router.post('/connect-webhook', auth, async (req: Request, res: Response) => {
+  const userId = (req as AuthRequest).user.id;
+  const { webhookUrl } = req.body;
+
+  if (!webhookUrl || typeof webhookUrl !== 'string' || !webhookUrl.includes('hooks.slack.com/services/')) {
+    return res.status(400).json({ ok: false, message: 'Please provide a valid Slack webhook URL (https://hooks.slack.com/services/...)' });
+  }
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { slackAccessToken: webhookUrl.trim() },
+  });
+
+  // Verify immediately by posting to Slack
+  const sent = await notifySlack(
+    userId,
+    '🎉 *Slack Connected to ReachInbox!* You will receive real-time notifications here whenever a sender reaches their hourly rate limit.'
+  );
+
+  return res.json({
+    ok: true,
+    verified: sent,
+    message: sent ? 'Slack webhook connected and verified!' : 'Webhook saved, but delivery failed. Please check the URL.',
+  });
 });
 
 /**
@@ -85,14 +126,46 @@ router.delete('/disconnect', auth, async (req: Request, res: Response) => {
     data: { slackAccessToken: null },
   });
   logger.info('slack.disconnected', { userId });
-  return res.json({ ok: true });
+  return res.json({ ok: true, message: 'Slack workspace disconnected.' });
 });
 
 /**
- * Test Slack notification endpoint
+ * Live Rate Limit Test Endpoint
+ * Sends an actual rate limit alert to the user's Slack channel for demo verification
+ */
+router.post('/test-rate-limit', auth, async (req: Request, res: Response) => {
+  const userId = (req as AuthRequest).user.id;
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+
+  if (!user || !user.slackAccessToken) {
+    return res.status(400).json({
+      ok: false,
+      message: 'Slack is not connected for your account. Please click "Connect Slack" first.',
+    });
+  }
+
+  const sender = await prisma.sender.findFirst();
+  const senderEmail = sender?.email || user.email;
+  const nextHour = new Date(Date.now() + 3600000).toISOString();
+  const text =
+    `⏳ *Hourly Rate Limit Reached* (Live Demo Alert)\n` +
+    `• Sender: *${senderEmail}*\n` +
+    `• Limit: *5 emails/hour*\n` +
+    `• Status: *Allowed limit reached. Subsequent scheduled emails delayed until ${nextHour}.*`;
+
+  const sent = await notifySlack(userId, text);
+  return res.json({
+    ok: sent,
+    message: sent
+      ? 'Live rate-limit notification sent to your Slack channel!'
+      : 'Could not deliver notification. Check your Slack webhook/token permissions.',
+  });
+});
+
+/**
+ * General test endpoint
  */
 router.all('/test', async (req: Request, res: Response) => {
-  const { notifySlack } = await import('../services/slack.service');
   const message = req.body?.message || req.query?.message || '🔔 *ReachInbox Alert*: Slack notifications are successfully connected!';
   const sent = await notifySlack(null, String(message));
   return res.json({
@@ -105,7 +178,7 @@ router.all('/test', async (req: Request, res: Response) => {
 /**
  * Check Slack status
  */
-router.get('/status', (_req: Request, res: Response) => {
+router.get('/status', (req: Request, res: Response) => {
   return res.json({
     webhookConfigured: Boolean(env.slackWebhookUrl),
     oauthConfigured: Boolean(env.slackClientId && env.slackClientSecret),

@@ -191,7 +191,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors"
         >
           <Slack className="w-4 h-4 text-purple-600" />
-          <span>{user?.slackAccessToken ? 'Slack Connected' : 'Connect Slack'}</span>
+          <span className="flex items-center gap-1.5">
+            {user?.slackAccessToken ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Slack Connected</span>
+              </>
+            ) : (
+              <span>Connect Slack</span>
+            )}
+          </span>
         </a>
 
         <button

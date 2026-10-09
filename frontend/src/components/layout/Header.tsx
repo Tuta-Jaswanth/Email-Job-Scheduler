@@ -2,15 +2,45 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../common/Button';
 import { Plus, LogOut, Mail, Slack, ChevronDown } from 'lucide-react';
-import { getSlackConnectUrl } from '../../lib/api';
+import { api, getSlackConnectUrl } from '../../lib/api';
+import { useToast } from '../../context/ToastContext';
 
 interface HeaderProps {
   onComposeClick: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ onComposeClick }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
+  const { success: toastSuccess, error: toastError } = useToast();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [isTestingSlack, setIsTestingSlack] = useState(false);
+  const [isDisconnectingSlack, setIsDisconnectingSlack] = useState(false);
+
+  const handleTestRateLimit = async () => {
+    setIsTestingSlack(true);
+    try {
+      const res = await api.post<{ ok: boolean; message: string }>('/api/slack/test-rate-limit');
+      toastSuccess('Slack Alert Sent', res.data.message || 'Live rate-limit alert sent to your Slack channel!');
+    } catch (err: any) {
+      toastError('Slack Alert Failed', err.message || 'Could not send alert to Slack.');
+    } finally {
+      setIsTestingSlack(false);
+    }
+  };
+
+  const handleDisconnectSlack = async () => {
+    if (!window.confirm('Disconnect your Slack workspace?')) return;
+    setIsDisconnectingSlack(true);
+    try {
+      await api.delete('/api/slack/disconnect');
+      await refreshUser();
+      toastSuccess('Slack Disconnected', 'Your Slack workspace has been unlinked.');
+    } catch (err: any) {
+      toastError('Disconnect Failed', err.message || 'Could not disconnect Slack.');
+    } finally {
+      setIsDisconnectingSlack(false);
+    }
+  };
 
   const getInitials = (name?: string, email?: string) => {
     if (name) {
@@ -111,21 +141,49 @@ export const Header: React.FC<HeaderProps> = ({ onComposeClick }) => {
                         </div>
                       </div>
 
-                      {/* Slack Notification Status */}
-                      <div className="px-4 py-2 text-xs text-gray-500 flex items-center justify-between border-b border-gray-100">
-                        <span className="flex items-center gap-1.5 font-medium text-gray-700">
-                          <Slack className="w-3.5 h-3.5 text-purple-600" />
-                          Slack Alerts
-                        </span>
-                        {user.slackAccessToken ? (
-                          <span className="text-emerald-600 font-medium">Connected</span>
-                        ) : (
-                          <a
-                            href={getSlackConnectUrl()}
-                            className="text-[#00a651] hover:underline font-semibold"
-                          >
-                            Connect
-                          </a>
+                      {/* Slack Notification Status & Actions */}
+                      <div className="px-4 py-2.5 text-xs text-gray-500 border-b border-gray-100 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="flex items-center gap-1.5 font-medium text-gray-700">
+                            <Slack className="w-3.5 h-3.5 text-purple-600" />
+                            Slack Alerts
+                          </span>
+                          {user.slackAccessToken ? (
+                            <span className="inline-flex items-center gap-1 text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full text-[11px]">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              Connected
+                            </span>
+                          ) : (
+                            <a
+                              href={getSlackConnectUrl()}
+                              className="text-[#00a651] hover:underline font-semibold"
+                            >
+                              Connect
+                            </a>
+                          )}
+                        </div>
+
+                        {user.slackAccessToken && (
+                          <div className="flex items-center gap-2 pt-1">
+                            <button
+                              type="button"
+                              onClick={handleTestRateLimit}
+                              disabled={isTestingSlack}
+                              className="flex-1 py-1 px-2 bg-purple-50 hover:bg-purple-100 text-purple-700 font-medium rounded text-[11px] transition-colors disabled:opacity-50 text-center"
+                              title="Send a real-time rate limit alert to your Slack channel"
+                            >
+                              {isTestingSlack ? 'Sending...' : '⚡ Test Rate Limit'}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleDisconnectSlack}
+                              disabled={isDisconnectingSlack}
+                              className="py-1 px-2 text-rose-600 hover:bg-rose-50 font-medium rounded text-[11px] transition-colors disabled:opacity-50"
+                              title="Disconnect Slack workspace"
+                            >
+                              {isDisconnectingSlack ? '...' : 'Disconnect'}
+                            </button>
+                          </div>
                         )}
                       </div>
 

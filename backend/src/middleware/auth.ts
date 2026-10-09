@@ -15,8 +15,9 @@ export async function auth(req: Request, res: Response, next: NextFunction) {
     ? req.headers.authorization.substring('Bearer '.length)
     : undefined;
 
-  // Cookie is the normal browser path. Bearer is retained for API/Postman use.
-  const token = req.signedCookies?.[AUTH_COOKIE] || req.cookies?.[AUTH_COOKIE] || bearer;
+  // Cookie is the normal browser path. Bearer is retained for API/Postman use. Query token supports top-level navigation links.
+  const queryToken = typeof req.query.token === 'string' ? req.query.token : undefined;
+  const token = req.signedCookies?.[AUTH_COOKIE] || req.cookies?.[AUTH_COOKIE] || bearer || queryToken;
 
   if (!token) {
     return res.status(401).json({ message: 'Unauthorized' });
