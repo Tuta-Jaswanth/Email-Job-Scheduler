@@ -16,6 +16,7 @@ import {
   File as GenericFile,
   Eye,
   X,
+  RotateCw,
 } from 'lucide-react';
 import { api } from '../../lib/api';
 import { useToast } from '../../context/ToastContext';
@@ -27,6 +28,7 @@ interface DetailProps {
   onCancelled?: () => void;
   onDeleted?: () => void;
   onToggleStar?: (email: Email) => void;
+  onUpdated?: (email: Email) => void;
 }
 
 export const Detail: React.FC<DetailProps> = ({
@@ -117,6 +119,23 @@ export const Detail: React.FC<DetailProps> = ({
       toastError('Cancel Failed', err.message || 'Could not cancel this email.');
     } finally {
       setIsCancelling(false);
+    }
+  };
+
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    try {
+      const response = await api.post<Email>(`/api/emails/${email.id}/retry`);
+      setEmail(response.data);
+      toastSuccess('Dispatched', 'Email has been successfully dispatched and marked as sent.');
+      if (onUpdated) onUpdated(response.data);
+      else if (onToggleStar) onToggleStar(response.data);
+    } catch (err: any) {
+      toastError('Retry Failed', err.message || 'Could not dispatch email.');
+    } finally {
+      setIsRetrying(false);
     }
   };
 
@@ -258,6 +277,20 @@ export const Detail: React.FC<DetailProps> = ({
             </button>
           )}
 
+          {/* Retry button – shown for FAILED emails */}
+          {email.status === 'FAILED' && (
+            <button
+              type="button"
+              onClick={handleRetry}
+              disabled={isRetrying}
+              className="hover:text-[#00a651] hover:bg-emerald-50 p-1.5 rounded-lg transition-colors flex items-center gap-1.5 text-xs font-semibold text-emerald-700 disabled:opacity-50"
+              title="Retry sending this email"
+            >
+              <RotateCw size={16} className={isRetrying ? 'animate-spin text-[#00a651]' : ''} />
+              <span className="hidden sm:inline">Retry</span>
+            </button>
+          )}
+
           {/* Delete Button */}
           <button
             type="button"
@@ -319,9 +352,21 @@ export const Detail: React.FC<DetailProps> = ({
 
         {/* Failure alert */}
         {email.status === 'FAILED' && (
-          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs">
-            <span className="font-semibold">Delivery Failure: </span>
-            {email.failureReason || 'Email could not be delivered through SMTP.'}
+          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shadow-2xs">
+            <div className="flex-1">
+              <span className="font-semibold text-rose-900">Delivery Failure: </span>
+              <span>{email.failureReason || 'Email could not be delivered through SMTP.'}</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleRetry}
+              disabled={isRetrying}
+              className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-medium text-xs rounded-lg shadow-sm transition-all shrink-0 disabled:opacity-50 cursor-pointer"
+              title="Retry delivering this email now"
+            >
+              <RotateCw size={13} className={isRetrying ? 'animate-spin' : ''} />
+              <span>{isRetrying ? 'Retrying delivery...' : 'Retry Delivery Now'}</span>
+            </button>
           </div>
         )}
 

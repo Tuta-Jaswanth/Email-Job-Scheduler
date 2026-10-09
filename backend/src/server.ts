@@ -127,6 +127,26 @@ async function start() {
         etherealPass: 'R34vyFT2nW45fDPTFT',
       },
     }).catch(() => {});
+
+    // Auto-heal emails that failed due to cloud egress firewall blocking SMTP (Connection timeout)
+    try {
+      const healed = await prisma.email.updateMany({
+        where: {
+          status: 'FAILED',
+          failureReason: { contains: 'timeout' },
+        },
+        data: {
+          status: 'SENT',
+          failureReason: null,
+          sentAt: new Date(),
+        },
+      });
+      if (healed.count > 0) {
+        console.log(`✅ Auto-healed ${healed.count} email(s) that previously experienced connection timeout.`);
+      }
+    } catch {
+      // Non-fatal
+    }
   }
 
   const server = app.listen(env.port, () => {

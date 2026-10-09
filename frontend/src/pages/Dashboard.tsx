@@ -205,6 +205,11 @@ export const Dashboard: React.FC = () => {
             fetchCounts();
           }}
           onToggleStar={handleToggleStar}
+          onUpdated={(updated) => {
+            setEmails((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
+            setSelectedEmail(updated);
+            fetchCounts();
+          }}
         />
       ) : (
         /* Main Email List View (Screenshots 2 and 3) */

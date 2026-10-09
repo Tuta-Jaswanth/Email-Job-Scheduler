@@ -5,6 +5,9 @@ import { indexEmail, deleteEmailFromIndex, searchEmails } from '../services/sear
 import { logger } from '../utils/logger';
 import { v4 as uuid } from 'uuid';
 
+import { sendMail } from '../services/mail.service';
+import { env } from '../config/env';
+
 type AuthRequest = Request & { user: { id: string } };
 
 // ── Schedule ─────────────────────────────────────────────────────────────────
@@ -252,4 +255,126 @@ export async function search(req: Request, res: Response) {
 
   const results = await searchEmails(q, userId);
   return res.json(results);
+}
+
+// ── Retry Email ───────────────────────────────────────────────────────────────
+
+export async function retryEmail(req: Request, res: Response) {
+  const userId = (req as AuthRequest).user.id;
+  const email = await prisma.email.findUnique({
+    where: { id: String(req.params.id) },
+    include: { sender: true },
+  });
+
+  if (!email || email.userId !== userId) {
+    return res.status(404).json({ message: 'Email not found' });
+  }
+
+  try {
+    const credentials = {
+      host: 'smtp.ethereal.email',
+      port: 587,
+      user: email.sender?.etherealUser || env.etherealUser || 'marjory.brown64@ethereal.email',
+      pass: email.sender?.etherealPass || env.etherealPass || 'R34vyFT2nW45fDPTFT',
+      from: email.sender?.name
+        ? `${email.sender.name} <${email.sender.email}>`
+        : email.sender?.email || 'reachinbox@example.com',
+    };
+
+    const rawAttachments = (email.attachments as any[]) || [];
+    const nodemailerAttachments = rawAttachments.map((att: any) => {
+      if (att.dataUrl && typeof att.dataUrl === 'string' && att.dataUrl.includes('base64,')) {
+        const base64Data = att.dataUrl.split('base64,')[1];
+        return {
+          filename: att.name || 'attachment',
+          content: Buffer.from(base64Data, 'base64'),
+          contentType: att.type,
+        };
+      }
+      return {
+        filename: att.name || 'attachment',
+        path: att.url || att.dataUrl,
+      };
+    });
+
+    await sendMail({
+      to: email.recipient,
+      subject: email.subject,
+      html: email.bodyHtml,
+      credentials,
+      attachments: nodemailerAttachments,
+    });
+
+    const updated = await prisma.email.update({
+      where: { id: email.id },
+      data: {
+        status: 'SENT',
+        sentAt: new Date(),
+        failureReason: null,
+      },
+      include: { sender: { select: { id: true, email: true, name: true } } },
+    });
+
+    await indexEmail({ ...updated, status: 'SENT' });
+    logger.info('controller.retry.success', { emailId: email.id, userId });
+
+    return res.json(updated);
+  } catch (err: any) {
+    const reason = err?.message || String(err);
+    logger.error('controller.retry.failed', { emailId: email.id, error: reason });
+    const failed = await prisma.email.update({
+      where: { id: email.id },
+      data: { status: 'FAILED', failureReason: reason },
+      include: { sender: { select: { id: true, email: true, name: true } } },
+    });
+    return res.status(500).json({ message: `Retry failed: ${reason}`, email: failed });
+  }
+}
+
+// ── Retry All Failed Emails ───────────────────────────────────────────────────
+
+export async function retryAllFailed(req: Request, res: Response) {
+  const userId = (req as AuthRequest).user.id;
+  const failedEmails = await prisma.email.findMany({
+    where: { userId, status: 'FAILED' },
+    include: { sender: true },
+  });
+
+  const retriedIds: string[] = [];
+
+  for (const email of failedEmails) {
+    try {
+      const credentials = {
+        host: 'smtp.ethereal.email',
+        port: 587,
+        user: email.sender?.etherealUser || env.etherealUser || 'marjory.brown64@ethereal.email',
+        pass: email.sender?.etherealPass || env.etherealPass || 'R34vyFT2nW45fDPTFT',
+        from: email.sender?.name
+          ? `${email.sender.name} <${email.sender.email}>`
+          : email.sender?.email || 'reachinbox@example.com',
+      };
+
+      await sendMail({
+        to: email.recipient,
+        subject: email.subject,
+        html: email.bodyHtml,
+        credentials,
+      });
+
+      await prisma.email.update({
+        where: { id: email.id },
+        data: {
+          status: 'SENT',
+          sentAt: new Date(),
+          failureReason: null,
+        },
+      });
+
+      retriedIds.push(email.id);
+    } catch {
+      // Continue retrying others
+    }
+  }
+
+  return res.json({ retriedCount: retriedIds.length, ids: retriedIds });
 }

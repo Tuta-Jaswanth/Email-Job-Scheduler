@@ -24,6 +24,7 @@ export const env = {
   etherealUser: process.env.ETHEREAL_USER || 'marjory.brown64@ethereal.email',
   etherealPass: process.env.ETHEREAL_PASSWORD || 'R34vyFT2nW45fDPTFT',
   etherealFrom: process.env.ETHEREAL_FROM || '',
+  resendApiKey: process.env.RESEND_API_KEY || '',
 };
 
 
