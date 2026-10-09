@@ -23,14 +23,14 @@ router.get('/', auth, async (req: Request, res: Response) => {
         where: { email: user.email },
         update: {
           name: user.name,
-          etherealUser: env.etherealUser,
-          etherealPass: env.etherealPass,
+          etherealUser: env.etherealUser || 'marjory.brown64@ethereal.email',
+          etherealPass: env.etherealPass || 'R34vyFT2nW45fDPTFT',
         },
         create: {
           email: user.email,
           name: user.name,
-          etherealUser: env.etherealUser,
-          etherealPass: env.etherealPass,
+          etherealUser: env.etherealUser || 'marjory.brown64@ethereal.email',
+          etherealPass: env.etherealPass || 'R34vyFT2nW45fDPTFT',
         },
         select: { id: true, email: true, name: true },
       })

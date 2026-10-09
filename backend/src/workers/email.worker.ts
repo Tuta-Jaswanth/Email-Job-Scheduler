@@ -75,8 +75,8 @@ export const emailWorker = new Worker(
       const credentials = {
         host: 'smtp.ethereal.email',
         port: 587,
-        user: email.sender.etherealUser,
-        pass: email.sender.etherealPass,
+        user: email.sender.etherealUser || env.etherealUser || 'marjory.brown64@ethereal.email',
+        pass: email.sender.etherealPass || env.etherealPass || 'R34vyFT2nW45fDPTFT',
         from: email.sender.name
           ? `${email.sender.name} <${email.sender.email}>`
           : email.sender.email,

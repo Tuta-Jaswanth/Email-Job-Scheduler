@@ -113,6 +113,20 @@ async function start() {
     }).catch((err) => {
       console.warn('[Prisma] Cleanup notice:', String(err?.message || err));
     });
+
+    // Auto-heal any senders created with empty SMTP credentials
+    await prisma.sender.updateMany({
+      where: {
+        OR: [
+          { etherealUser: '' },
+          { etherealPass: '' },
+        ],
+      },
+      data: {
+        etherealUser: 'marjory.brown64@ethereal.email',
+        etherealPass: 'R34vyFT2nW45fDPTFT',
+      },
+    }).catch(() => {});
   }
 
   const server = app.listen(env.port, () => {

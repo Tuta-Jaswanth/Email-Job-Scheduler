@@ -21,8 +21,8 @@ export const env = {
   slackClientId: process.env.SLACK_CLIENT_ID || '',
   slackClientSecret: process.env.SLACK_CLIENT_SECRET || '',
   slackRedirect: process.env.SLACK_REDIRECT_URI || (isProd ? 'https://reachinbox-hiring.onrender.com/api/slack/callback' : 'http://localhost:4000/api/slack/callback'),
-  etherealUser: process.env.ETHEREAL_USER || '',
-  etherealPass: process.env.ETHEREAL_PASSWORD || '',
+  etherealUser: process.env.ETHEREAL_USER || 'marjory.brown64@ethereal.email',
+  etherealPass: process.env.ETHEREAL_PASSWORD || 'R34vyFT2nW45fDPTFT',
   etherealFrom: process.env.ETHEREAL_FROM || '',
 };
 
