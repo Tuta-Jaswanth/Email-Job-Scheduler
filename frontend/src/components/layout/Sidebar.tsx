@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User, TabType } from '../../types';
 import { useAuth } from '../../context/AuthContext';
-import { Clock3, Send, Plus, LogOut, Slack, ChevronDown, Mail } from 'lucide-react';
+import { Clock3, Send, Plus, LogOut, Slack, ChevronDown, Mail, Inbox } from 'lucide-react';
 import { getSlackConnectUrl } from '../../lib/api';
 
 interface SidebarProps {
@@ -9,6 +9,8 @@ interface SidebarProps {
   tab: TabType;
   onTabChange: (tab: TabType) => void;
   onComposeClick: () => void;
+  inboxCount?: number;
+  unreadInboxCount?: number;
   scheduledCount?: number;
   sentCount?: number;
 }
@@ -18,6 +20,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   tab,
   onTabChange,
   onComposeClick,
+  inboxCount = 0,
+  unreadInboxCount = 0,
   scheduledCount = 0,
   sentCount = 0,
 }) => {
@@ -127,6 +131,42 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Tabs */}
       <div className="space-y-1">
+        {/* Inbox Tab (Received Emails) */}
+        <button
+          onClick={() => onTabChange('inbox')}
+          className={`w-full text-left px-3.5 py-2.5 rounded-xl flex items-center justify-between text-sm transition-colors ${
+            tab === 'inbox'
+              ? 'bg-[#e8f7ef] text-gray-900 font-semibold'
+              : 'text-gray-600 hover:bg-gray-50 font-normal'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <Inbox
+              className={`w-4 h-4 ${
+                tab === 'inbox' ? 'text-[#008f45]' : 'text-gray-400'
+              }`}
+            />
+            <span>Inbox</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {unreadInboxCount > 0 ? (
+              <span className="bg-[#00a651] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-2xs">
+                {unreadInboxCount}
+              </span>
+            ) : (
+              <span
+                className={`text-xs ${
+                  tab === 'inbox'
+                    ? 'font-bold text-[#008f45]'
+                    : 'text-gray-400 font-normal'
+                }`}
+              >
+                {inboxCount}
+              </span>
+            )}
+          </div>
+        </button>
+
         {/* Scheduled Tab */}
         <button
           onClick={() => onTabChange('scheduled')}

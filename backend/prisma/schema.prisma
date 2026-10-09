@@ -22,6 +22,7 @@ model User {
   slackAccessToken String?
   createdAt DateTime @default(now())
   emails Email[]
+  receivedEmails ReceivedEmail[]
 }
 model Sender {
   id String @id @default(uuid())
@@ -52,4 +53,25 @@ model Email {
   sender Sender @relation(fields:[senderId], references:[id])
   @@index([userId,status,scheduledAt])
   @@index([senderId,scheduledAt])
+}
+
+model ReceivedEmail {
+  id          String   @id @default(uuid())
+  userId      String
+  from        String
+  fromEmail   String
+  to          String
+  subject     String
+  bodyHtml    String
+  bodyText    String?
+  isRead      Boolean  @default(false)
+  isStarred   Boolean  @default(false)
+  attachments Json?
+  receivedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, receivedAt])
+  @@index([userId, isRead])
 }

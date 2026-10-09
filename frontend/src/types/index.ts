@@ -44,6 +44,23 @@ export interface Email {
   sender?: Sender;
 }
 
+export interface ReceivedEmail {
+  id: string;
+  userId: string;
+  from: string;
+  fromEmail: string;
+  to: string;
+  subject: string;
+  bodyHtml: string;
+  bodyText?: string | null;
+  isRead: boolean;
+  isStarred: boolean;
+  attachments?: EmailAttachment[];
+  receivedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface SchedulePayload {
   subject: string;
   bodyHtml: string;
@@ -61,7 +78,7 @@ export interface ScheduleResponse {
   message?: string;
 }
 
-export type TabType = 'scheduled' | 'sent';
+export type TabType = 'inbox' | 'scheduled' | 'sent';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';
 

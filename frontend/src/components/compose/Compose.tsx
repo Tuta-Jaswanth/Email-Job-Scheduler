@@ -19,9 +19,18 @@ import { useAuth } from '../../context/AuthContext';
 interface ComposeProps {
   onBack: () => void;
   onSuccess?: () => void;
+  initialRecipients?: string[];
+  initialSubject?: string;
+  initialBody?: string;
 }
 
-export const Compose: React.FC<ComposeProps> = ({ onBack, onSuccess }) => {
+export const Compose: React.FC<ComposeProps> = ({
+  onBack,
+  onSuccess,
+  initialRecipients,
+  initialSubject,
+  initialBody,
+}) => {
   const { user } = useAuth();
   const { success: toastSuccess, error: toastError, warning: toastWarning } = useToast();
 
@@ -29,12 +38,12 @@ export const Compose: React.FC<ComposeProps> = ({ onBack, onSuccess }) => {
   const [selectedSender, setSelectedSender] = useState<string>(user?.email || '');
   const [senderDropdownOpen, setSenderDropdownOpen] = useState(false);
 
-  const [recipients, setRecipients] = useState<string[]>([]);
+  const [recipients, setRecipients] = useState<string[]>(initialRecipients || []);
   const [inlineEmail, setInlineEmail] = useState<string>('');
-  const [subject, setSubject] = useState<string>('');
+  const [subject, setSubject] = useState<string>(initialSubject || '');
   const [delaySec, setDelaySec] = useState<string>('00');
   const [hourlyLimit, setHourlyLimit] = useState<string>('00');
-  const [bodyHtml, setBodyHtml] = useState<string>('');
+  const [bodyHtml, setBodyHtml] = useState<string>(initialBody || '');
 
   // File Attachments
   const [attachments, setAttachments] = useState<EmailAttachment[]>([]);
@@ -68,6 +77,12 @@ export const Compose: React.FC<ComposeProps> = ({ onBack, onSuccess }) => {
       })
       .catch((err) => console.warn('Could not load senders:', err));
   }, [user]);
+
+  useEffect(() => {
+    if (editorRef.current && initialBody) {
+      editorRef.current.innerHTML = initialBody;
+    }
+  }, [initialBody]);
 
   const extractEmails = (text: string): string[] => {
     const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;

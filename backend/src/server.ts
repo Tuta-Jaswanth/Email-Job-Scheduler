@@ -8,6 +8,7 @@ import emailRoutes from './routes/email.routes';
 import slackRoutes from './routes/slack.routes';
 import senderRoutes from './routes/sender.routes';
 import userRoutes from './routes/user.routes';
+import inboxRoutes from './routes/inbox.routes';
 import { ensureIndex } from './services/search.service';
 import { emailWorker, shutdownWorker } from './workers/email.worker';
 import { serverAdapter } from './queues/board';
@@ -112,6 +113,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/emails', emailRoutes);
 app.use('/api/slack', slackRoutes);
 app.use('/api/senders', senderRoutes);
+app.use('/api/inbox', inboxRoutes);
 app.use('/api', userRoutes);
 
 // 404 catch-all
