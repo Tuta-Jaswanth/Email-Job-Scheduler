@@ -88,4 +88,28 @@ router.delete('/disconnect', auth, async (req: Request, res: Response) => {
   return res.json({ ok: true });
 });
 
+/**
+ * Test Slack notification endpoint
+ */
+router.all('/test', async (req: Request, res: Response) => {
+  const { notifySlack } = await import('../services/slack.service');
+  const message = req.body?.message || req.query?.message || '🔔 *ReachInbox Alert*: Slack notifications are successfully connected!';
+  const sent = await notifySlack(null, String(message));
+  return res.json({
+    ok: sent,
+    webhookConfigured: Boolean(env.slackWebhookUrl),
+    message: sent ? 'Test notification sent to Slack successfully!' : 'Could not deliver to Slack.',
+  });
+});
+
+/**
+ * Check Slack status
+ */
+router.get('/status', (_req: Request, res: Response) => {
+  return res.json({
+    webhookConfigured: Boolean(env.slackWebhookUrl),
+    oauthConfigured: Boolean(env.slackClientId && env.slackClientSecret),
+  });
+});
+
 export default router;

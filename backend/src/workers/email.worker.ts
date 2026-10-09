@@ -116,6 +116,12 @@ export const emailWorker = new Worker(
 
       logger.info('worker.email.sent', { emailId, recipient: email.recipient });
 
+      // Notify Slack channel (non-blocking)
+      notifySlack(
+        email.userId,
+        `📨 *Email Sent*: Successfully delivered to \`${email.recipient}\` (Subject: *${email.subject}*)`,
+      ).catch(() => {});
+
       // Configurable throttle between sends (prevents SMTP rate-limit bans)
       if (env.minDelayMs > 0) {
         await new Promise((r) => setTimeout(r, env.minDelayMs));
@@ -132,6 +138,12 @@ export const emailWorker = new Worker(
       });
 
       await indexEmail({ ...failed, status: 'FAILED' });
+
+      // Notify Slack channel (non-blocking)
+      notifySlack(
+        email.userId,
+        `⚠️ *Delivery Failure*: Email to \`${email.recipient}\` failed.\n*Reason*: ${reason}`,
+      ).catch(() => {});
 
       // Re-throw so BullMQ records the failure and applies the retry strategy
       throw err;
