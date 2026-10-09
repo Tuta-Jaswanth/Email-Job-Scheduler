@@ -32,10 +32,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Process URL query parameters for OAuth results
     const params = new URLSearchParams(window.location.search);
+    const token = params.get('token') || params.get('auth_token');
     const authError = params.get('authError');
     const slackStatus = params.get('slack');
 
     let shouldCleanUrl = false;
+
+    if (token) {
+      localStorage.setItem('reachinbox_token', token);
+      shouldCleanUrl = true;
+    }
 
     if (authError) {
       shouldCleanUrl = true;
@@ -71,6 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (err) {
       console.error('Logout error:', err);
     } finally {
+      localStorage.removeItem('reachinbox_token');
       setUser(null);
       window.location.href = '/';
     }
